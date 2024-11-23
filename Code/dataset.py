@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from utils import *
-from constants import BAD_CHANNELS, SUBSAMPLING_FREQUENCY
 
+from utils import *
+from constants import *
 
 def get_dataset(data_path='../Data/Dataset_4subjects_Exe_Obs', type='without_normalization', norm_before_sep=False, norm_after_sep=False):
     """
@@ -145,19 +145,39 @@ def subsample(df, subsampling_frequency=SUBSAMPLING_FREQUENCY):
     
     return df
 
-def separate_frequency_bands(df):
+def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
     """
     Separate the dataset into frequency bands
 
     Args:
         data (DataFrame): dataset
+        freq_bands (dict, optional): frequency bands. Defaults to FREQ_BANDS.
 
     Returns:
         DataFrame: dataset with separated frequency bands & channels (participants, session, obs/ex, channel1_alpha, ...)
     """
-    nb_channels = get_highest_number_of_channels(df)
+    dfc = df.copy()
+    max_nb_channels = get_highest_number_of_channels(dfc)
+    new_cols = ([f'channel{channel}_{band_name}' for channel in range(max_nb_channels) for band_name in freq_bands.keys()])
     
-    return df
+    def sep_signal_in_freqs(row):
+        signal = row['neural_data']
+    
+        new_cols = []
+        for channel in range(max_nb_channels):
+            if channel < len(signal):
+                for band_name, (low, high) in freq_bands.items():
+                    filtered_channel = bandpass_filter(signal[channel], low, high, 500)
+                    new_cols.append(filtered_channel)
+            else:
+                for _ in range(len(freq_bands)):
+                    new_cols.append(None)
+                
+        return tuple(new_cols)
+    
+    dfc[new_cols] = dfc.apply(sep_signal_in_freqs, axis=1, result_type='expand')
+    dfc = dfc.drop(['neural_data'], axis=1)
+    return dfc
 
 
 def standardize_duration(df):
