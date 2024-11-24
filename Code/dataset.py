@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.ndimage import convolve1d
 
 from utils import *
 from constants import *
@@ -60,7 +61,20 @@ def remove_electrical_noise(data):
     Returns:
         dictionary: dataset with applied notch filter to remove electrical noise
     """
-    
+    # TODO find a better way to remove all electrical noise in one sweep
+    elec_noise = [(k*50-2, k*50+2) for k in range(1, 3)]
+    # Apply bandstop filter to remove electrical noise
+    # For each participant
+    for participant in data.keys():
+        # For each session
+        for session in data[participant].keys():
+            # For each channel in list of channels
+            for channel in range(len(data[participant][session]['neural_data'])):
+                # For each noise freq.
+                for noise_freq in elec_noise:
+                    data[participant][session]['neural_data'][channel] = \
+                        bandstop_filter(data[participant][session]['neural_data'][channel], noise_freq[0], noise_freq[1])
+
     return data
     
 def separate_trials(data):
@@ -157,24 +171,30 @@ def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
         DataFrame: dataset with separated frequency bands & channels (participants, session, obs/ex, channel1_alpha, ...)
     """
     dfc = df.copy()
-    max_nb_channels = get_highest_number_of_channels(dfc)
-    new_cols = ([f'channel{channel}_{band_name}' for channel in range(max_nb_channels) for band_name in freq_bands.keys()])
+    max_nb_channels = get_max_nb_channels(dfc)
     
     def sep_signal_in_freqs(row):
         signal = row['neural_data']
     
         new_cols = []
-        for channel in range(max_nb_channels):
-            if channel < len(signal):
+        for channel_idx in range(max_nb_channels):
+            if channel_idx < len(signal):
+                # Remove frequencies that are too low (noise) or too high (not eeg-related)
+                channel = bandpass_filter(signal[channel_idx], 0.5, 150)
                 for band_name, (low, high) in freq_bands.items():
-                    filtered_channel = bandpass_filter(signal[channel], low, high, 500)
-                    new_cols.append(filtered_channel)
+                    # Bandpass filter the channel
+                    filtered_channel = bandpass_filter(channel, low, high)
+                    # Take the envelope of the frequency band with a Hilbert transform
+                    enveloped_channel = hilbert(rectified_channel)
+                    enveloped_channel = np.abs(enveloped_channel)
+                    new_cols.append(enveloped_channel)
             else:
                 for _ in range(len(freq_bands)):
                     new_cols.append(None)
                 
         return tuple(new_cols)
     
+    new_cols = ([f'channel{channel}_{band_name}' for channel in range(max_nb_channels) for band_name in freq_bands.keys()])
     dfc[new_cols] = dfc.apply(sep_signal_in_freqs, axis=1, result_type='expand')
     dfc = dfc.drop(['neural_data'], axis=1)
     return dfc
