@@ -212,3 +212,86 @@ def standardize_duration(df):
     """
     
     return df
+
+def get_trials(session_data, channel, fps):
+    '''
+    Get the trials from the session data for a given channel.
+    
+    Parameters:
+    - session_data: dict, the data of a session.
+    - channel: int, the index of the channel.
+    - fps: int, the sampling rate of the data.
+    
+    Returns:
+    - trials: list of 1D NumPy arrays, the trials.
+    '''
+    
+    trial_starts = session_data['trials_info']['TS_TrialStart']
+    trial_end = session_data['trials_info']['TS_HandBack']
+    trials = {f"trial_{i}":session_data['neural_data'][channel][int(trial_starts[i]) * fps:int(trial_end[i]) * fps] for i in range(len(trial_starts))}
+    return trials
+
+def get_trials_all_channels (session_data, fps=2048) :
+    '''
+    Get the trials from the session data for all channels.
+    
+    Parameters:
+    - session_data: dict, the data of a session.
+    - fps: int, the sampling rate of the data.
+    
+    Returns:
+    - session_data: dict, the input dictionnary with an new trial key that stores the timepoints for each trial.
+    '''
+    trial_dict = {f'channel_{channel}': get_trials(session_data, channel, fps = fps) for channel in range(len(session_data['channel_labels']))}
+    session_data['trials'] = trial_dict
+    return session_data
+
+def remove_trials_with_error (session_data):
+    '''
+    Remove the trials with an error from the session data.
+    
+    Parameters:
+    - session_data: dict, the data of a session.
+    
+    Returns:
+    - session_data: dict, the input dictionnary with the erroneous trials removed
+    '''
+    
+    erroneous_trials = [i for i in range(len(session_data['trials_info']['ErrorType'])) if session_data['trials_info']['ErrorType'][i] != 'NoError']
+
+    for trial_id in erroneous_trials:
+        for channel_idx in range(len(session_data['channel_labels'])):
+            session_data['trials'][f'channel_{channel_idx}'].pop(f'trial_{trial_id}')
+                
+    return session_data
+
+def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='each_trial'):
+    '''
+    Normalize the entire signal with the average of the baseline periods over all trials.
+    
+    Parameters:
+    - session_data: dict, the session data.
+    - fps: int, the sampling rate of the data.
+    - baseline_duration: int, the duration of the baseline period in seconds.
+    - how: string, the normalization method to use. Either 'each_trial' or 'all_trials'.
+    
+    Returns:
+    - session_data: dict, the input dictionnary with the trials normalized.
+    '''
+    if how == 'each_trial':
+        for channel in session_data['trials'].keys():
+            for trial in session_data['trials'][channel].keys():
+                mean = session_data['trials'][channel][trial][0:int(fps*baseline_duration)].mean()
+                session_data['trials'][channel][trial] = session_data['trials'][channel][trial] - mean
+                
+    elif how == 'all_trials':
+        means = []
+        for channel in session_data['trials'].keys():
+            for trial in session_data['trials'][channel].keys():
+                means.append(session_data['trials'][channel][trial][0:int(fps*baseline_duration)].mean())
+        total_mean = np.mean(means)
+        for channel in session_data['trials'].keys():
+            for trial in session_data['trials'][channel].keys():
+                session_data['trials'][channel][trial] = session_data['trials'][channel][trial] - total_mean
+    
+    return session_data    
