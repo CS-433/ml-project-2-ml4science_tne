@@ -213,22 +213,22 @@ def standardize_duration(df):
     
     return df
 
-def get_trials(session_data, channel, fps):
+def get_trials(session_data, fps):
     '''
-    Get the trials from the session data for a given channel.
+    Get the trials from the session data.
     
     Parameters:
     - session_data: dict, the data of a session.
-    - channel: int, the index of the channel.
     - fps: int, the sampling rate of the data.
     
     Returns:
-    - trials: list of 1D NumPy arrays, the trials.
+    - trials: list of 2D NumPy arrays, each element in the list is an array with the timeseries of the trial in each channel.
     '''
-    
     trial_starts = session_data['trials_info']['TS_TrialStart']
     trial_end = session_data['trials_info']['TS_HandBack']
-    trials = {f"trial_{i}":session_data['neural_data'][channel][int(trial_starts[i]) * fps:int(trial_end[i]) * fps] for i in range(len(trial_starts))}
+    trials = []
+    for i in range(len(trial_starts)):
+        trials.append(session_data['neural_data'][:,int(trial_starts[i]) * fps:int(trial_end[i]) * fps])
     return trials
 
 def separate_trials (session_data, fps=2048) :
