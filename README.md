@@ -80,3 +80,21 @@ Our code was run on Windows hardware.
 
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/UDdkOEMs)
+
+
+
+
+
+
+
+Questions 
+- When do we subsample ?
+    - Before or after 
+- How do handle the fact that participant does not have the same number of channels ?
+    - Fill empty channels with None, 0 ?
+    - Chose a certain number of channels ? 
+- Moving average, then UMAP ? PCA ? 
+- Mean of enveloppe to substract or addition to the enveloppe of each trial 
+    - Enveloppe of raw signal or seperate by frequency band 
+
+

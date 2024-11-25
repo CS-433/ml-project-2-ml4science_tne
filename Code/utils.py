@@ -2,7 +2,7 @@ import pickle
 
 
 def load_pickle(data_path):
-    filename = data_path +  '.pickle'
+    filename = data_path 
     with open(filename, 'rb') as f:
         dataset = pickle.load(f)
     return dataset

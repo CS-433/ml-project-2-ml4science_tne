@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 from utils import *
-from constants import BAD_CHANNELS, SUBSAMPLING_FREQUENCY
+from constants import DATA_PATH, BAD_CHANNELS, SUBSAMPLING_FREQUENCY
 
 
-def get_dataset(data_path='../Data/Dataset_4subjects_Exe_Obs', type='without_normalization', norm_before_sep=False, norm_after_sep=False):
+def get_dataset(data_path=DATA_PATH, type='without_normalization', norm_before_sep=False, norm_after_sep=False):
     """
     Load and preprocess the dataset
 
