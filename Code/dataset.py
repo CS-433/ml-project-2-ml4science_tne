@@ -234,9 +234,9 @@ def get_trials(session_data, channel, fps):
     trials = {f"trial_{i}":session_data['neural_data'][channel][int(trial_starts[i]) * fps:int(trial_end[i]) * fps] for i in range(len(trial_starts))}
     return trials
 
-def get_trials_all_channels (session_data, fps=2048) :
+def separate_trials (session_data, fps=2048) :
     '''
-    Get the trials from the session data for all channels.
+    Separate trials from the session data for all channels.
     
     Parameters:
     - session_data: dict, the data of a session.
