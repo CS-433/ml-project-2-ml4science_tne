@@ -145,7 +145,7 @@ def normalize(df):
     
     return df
 
-def subsample(df, subsampling_frequency=SUBSAMPLING_FREQUENCY):
+def subsample(df, subsampling_frequency=FS//SUBSAMPLING_FREQUENCY):
     """
     Subsample the dataset
 
@@ -158,7 +158,7 @@ def subsample(df, subsampling_frequency=SUBSAMPLING_FREQUENCY):
     """
     
     dfc = df.copy(deep=True)
-    dfc['sub_neural_data'] = df['neural_data'].apply(lambda x: x[::subsampling_frequency])
+    dfc['sub_neural_data'] = df['neural_data'].apply(lambda channels: channels[::subsampling_frequency])
     dfc = dfc.drop(['neural_data'], axis=1)
     return dfc
 
@@ -177,7 +177,7 @@ def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
     max_nb_channels = get_max_nb_channels(dfc)
     
     def sep_signal_in_freqs(row):
-        signal = row['neural_data']
+        signal = row['sub_neural_data']
     
         new_cols = []
         for channel_idx in range(max_nb_channels):
@@ -199,7 +199,7 @@ def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
     
     new_cols = ([f'channel{channel}_{band_name}' for channel in range(max_nb_channels) for band_name in freq_bands.keys()])
     dfc[new_cols] = dfc.apply(sep_signal_in_freqs, axis=1, result_type='expand')
-    dfc = dfc.drop(['neural_data'], axis=1)
+    dfc = dfc.drop(['sub_neural_data'], axis=1)
     return dfc
 
 
@@ -234,7 +234,7 @@ def get_trials(session_data, channel, fps):
     trials = {f"trial_{i}":session_data['neural_data'][channel][int(trial_starts[i]) * fps:int(trial_end[i]) * fps] for i in range(len(trial_starts))}
     return trials
 
-def separate_trials (session_data, fps=2048) :
+def separate_trials(session_data, fps=2048) :
     '''
     Separate trials from the session data for all channels.
     
@@ -249,7 +249,7 @@ def separate_trials (session_data, fps=2048) :
     session_data['trials'] = trial_dict
     return session_data
 
-def remove_trials_with_error (session_data):
+def remove_trials_with_error(session_data):
     '''
     Remove the trials with an error from the session data.
     
@@ -268,7 +268,7 @@ def remove_trials_with_error (session_data):
                 
     return session_data
 
-def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='each_trial'):
+def substract_mean_baseline(session_data, fps, baseline_duration = 1.0, how='each_trial'):
     '''
     Normalize the entire signal with the average of the baseline periods over all trials.
     
