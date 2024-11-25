@@ -104,16 +104,16 @@ def baseline_correction(df, method='single'):
     Returns:
         DataFrame: dataset with applied baseline correction
     """
-    baseline_data = separate_segments(df, 'TS_TrialStart', 'TS_CueON')
-    # Is experiment going from TrialStart, CueOn or GoSignal
-    experiment_data = separate_segments(df, 'TS_CueOn', 'TS_HandBack')
+    # baseline_data = separate_segments(df, 'TS_TrialStart', 'TS_CueON')
+    # # Is experiment going from TrialStart, CueOn or GoSignal
+    # experiment_data = separate_segments(df, 'TS_CueOn', 'TS_HandBack')
     
-    if method == 'mean':
-        baseline = np.mean(baseline_data)
-    elif method == 'single':
-        baseline = np.median(baseline_data)
-    else:
-        raise ValueError('Invalid method')
+    # if method == 'mean':
+    #     baseline = np.mean(baseline_data)
+    # elif method == 'single':
+    #     baseline = np.median(baseline_data)
+    # else:
+    #     raise ValueError('Invalid method')
     
     return df
     
@@ -157,7 +157,10 @@ def subsample(df, subsampling_frequency=SUBSAMPLING_FREQUENCY):
         DataFrame: dataset with subsampled data
     """
     
-    return df
+    dfc = df.copy(deep=True)
+    dfc['sub_neural_data'] = df['neural_data'].apply(lambda x: x[::subsampling_frequency])
+    dfc = dfc.drop(['neural_data'], axis=1)
+    return dfc
 
 def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
     """
@@ -276,7 +279,7 @@ def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='ea
     - how: string, the normalization method to use. Either 'each_trial' or 'all_trials'.
     
     Returns:
-    - session_data: dict, the input dictionnary with the trials normalized.
+    - session_data: dict, the input dictionary with the trials normalized.
     '''
     if how == 'each_trial':
         for channel in session_data['trials'].keys():
