@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import convolve1d
 
-from scipy.signal import welch, correlate, coherence
+from scipy.signal import welch, correlate,coherence
 from scipy.stats import ttest_ind, f_oneway
 import matplotlib.pyplot as plt
 
@@ -235,21 +235,6 @@ def get_trials(session_data, fps):
         trials.append(session_data['neural_data'][:,int(trial_starts[i]) * fps:int(trial_end[i]) * fps])
     return trials
 
-def separate_trials (session_data, fps=2048) :
-    '''
-    Separate trials from the session data for all channels.
-    
-    Parameters:
-    - session_data: dict, the data of a session.
-    - fps: int, the sampling rate of the data.
-    
-    Returns:
-    - session_data: dict, the input dictionnary with an new trial key that stores the timepoints for each trial.
-    '''
-    trial_dict = {f'channel_{channel}': get_trials(session_data, channel, fps = fps) for channel in range(len(session_data['channel_labels']))}
-    session_data['trials'] = trial_dict
-    return session_data
-
 def remove_trials_with_error (session_data):
     '''
     Remove the trials with an error from the session data.
@@ -321,10 +306,10 @@ def get_mean_baseline_and_activity (session_data, channel_id, fps=2048):
     return mean_baseline, mean_action
 
 
-def analyze_differences_between_baseline_and_activity (session, num_channels, plot, fps=2048, row_length = 4, fig_width = 20):
+def analyze_differences_between_baseline_and_activity (session, num_channels, plot, fps=2048, num_cols = 4, fig_width = 20):
     '''
     Analyze the differences between the baseline and activity for each channel in the session data.
-    This function calculates the power spectral density, correlation, coherence, t-test and f-test between the baseline signal and activity signal for each channel.
+    This function calculates the power spectral density, correlation, coherence, t-test between the baseline signal and activity signal for each channel.
     It can also plot the power spectral density of the baseline and activity as well as their difference for each channel.
     
     Parameters:
@@ -332,7 +317,7 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
     - num_channels: int, the number of channels to analyse.
     - plot: bool, whether to plot the power spectral density or not.
     - fps: int, the sampling rate of the data. (default 2048)
-    - row_length: int, the number of channels to plot in each row. (default 4)
+    - num_cols: int, the number of columns plot. (default 4)
     - fig_width: int, the width of the figure. (default 20)
     
     Returns:
@@ -347,16 +332,15 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
     - cohe: list of tuples of numpy arrays, the coherence function between the baseline and activity for each channel. 
             The first element of the tuple is the frequency and the second is the coherence at that given frequency.
     - ttests: list of tuples, the t-test between the power spectral density of the baseline and activity for each channel.
-    - ftests: list of tuples, the f-test between the power spectral density of the baseline and activity for each channel.
     '''
     
-    col_length = np.ceil(num_channels / row_length).astype(int)
-    fig_height = row_length * col_length
+    num_rows = np.ceil(num_channels / num_cols).astype(int)
+    fig_height = fig_width * num_rows / num_cols
 
     if plot : 
-        fig, axs = plt.subplots(col_length, row_length, figsize=(fig_width, fig_height))
+        fig, axs = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height))
 
-    plot_ids = np.ones((col_length, row_length), dtype=object)
+    plot_ids = np.ones((num_rows, num_cols), dtype=object)
 
     list_baseline_psds = []
     list_activity_psds = []    
@@ -364,14 +348,13 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
     ttests = []
     corr = []
     cohe = []
-    ftests = []
     
 
     for i,row in enumerate(plot_ids):
         for j, _ in enumerate(row):
-            if i*4+j >= num_channels:
+            if i*num_cols+j >= num_channels:
                 break
-            mean_baseline, mean_activity = get_mean_baseline_and_activity(session,i*4+j)
+            mean_baseline, mean_activity = get_mean_baseline_and_activity(session,i*num_cols+j)
             baseline_psd = welch(mean_baseline, fs=fps)
             list_baseline_psds.append(baseline_psd)
             list_activity_psds.append(welch(mean_activity, fs=fps))
@@ -380,18 +363,18 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
             corr.append(correlate(mean_baseline, mean_activity))
             cohe.append(coherence(mean_baseline, mean_activity, fs=fps))
             ttests.append(ttest_ind(baseline_psd[1], activity_psd[1], equal_var=False))
-            ftests.append(f_oneway(baseline_psd[1], activity_psd[1]))
             if plot:
                 axs[i][j].plot(baseline_psd[0],baseline_psd[1], label='baseline', alpha=0.5)
                 axs[i][j].plot(activity_psd[0],activity_psd[1], label='activity', alpha=0.5)
                 axs[i][j].plot(baseline_psd[0],absolute_psd_difference[-1], label='absolute difference', alpha=0.5)
-                axs[i][j].set_title(f'Power spectral density for channel {i*4+j}')
+                axs[i][j].set_title(f'Power spectral density for channel {i*num_cols+j}')
                 axs[i][j].set_xlabel('frequency [Hz]')
                 axs[i][j].set_ylabel('PSD [V**2/Hz]')
+                axs[i][j].set_xlim(0, 150)
                 axs[i][j].legend()
                 axs[i][j].grid()
     if plot:
         plt.tight_layout()
         plt.show()
     
-    return list_baseline_psds, list_activity_psds, absolute_psd_difference, corr, cohe, ttests, ftests
+    return list_baseline_psds, list_activity_psds, absolute_psd_difference, corr, cohe, ttests
