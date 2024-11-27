@@ -265,7 +265,7 @@ def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='ea
     - how: string, the normalization method to use. Either 'each_trial' or 'all_trials'.
     
     Returns:
-    - session_data: dict, the input dictionnary with the trials normalized.
+    - session_data: dict, the input dictionary with the trials normalized.
     '''
     if how == 'each_trial':
         for channel in session_data['trials'].keys():
@@ -285,12 +285,11 @@ def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='ea
     
     return session_data
 
-def get_mean_baseline_and_activity (session_data, channel_id, fps=2048):
+def get_baselines_and_activities(session_data, channel_id, fps=2048):
 
     trial_starts = session_data['trials_info']['TS_TrialStart']
     trial_action = session_data['trials_info']['TS_ObjectGrasp']
     no_errors = np.array(session_data['trials_info']['ErrorCode']) == 0
-
 
     channel_ts = session_data['neural_data'][channel_id]
     channel_baselines = []
@@ -299,6 +298,12 @@ def get_mean_baseline_and_activity (session_data, channel_id, fps=2048):
         if no_errors[i]:
             channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
             channel_actions.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+    
+    return channel_baselines, channel_actions
+
+def get_mean_baseline_and_activity (session_data, channel_id, fps=2048):
+
+    channel_baselines, channel_actions = get_baselines_and_activities(session_data, channel_id, fps)
         
     mean_baseline = np.array(channel_baselines).mean(axis=0)
     mean_action = np.array(channel_actions).mean(axis=0)
