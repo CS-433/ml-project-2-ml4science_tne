@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import convolve1d
 
-from scipy.signal import welch, correlate,coherence
-from scipy.stats import ttest_ind, f_oneway
+from scipy.signal import welch, correlate, coherence
+from scipy.stats import ttest_rel
 import matplotlib.pyplot as plt
 
 from utils import *
@@ -362,7 +362,7 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
             absolute_psd_difference.append(np.abs(activity_psd[1] - baseline_psd[1]))
             corr.append(correlate(mean_baseline, mean_activity))
             cohe.append(coherence(mean_baseline, mean_activity, fs=fps))
-            ttests.append(ttest_ind(baseline_psd[1], activity_psd[1], equal_var=False))
+            ttests.append(ttest_rel(baseline_psd[1], activity_psd[1]))
             if plot:
                 axs[i][j].plot(baseline_psd[0],baseline_psd[1], label='baseline', alpha=0.5)
                 axs[i][j].plot(activity_psd[0],activity_psd[1], label='activity', alpha=0.5)
