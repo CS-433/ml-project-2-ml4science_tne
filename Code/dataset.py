@@ -285,33 +285,83 @@ def substract_mean_baseline (session_data, fps, baseline_duration = 1.0, how='ea
     
     return session_data
 
-def get_baselines_and_activities(session_data, channel_id, fps=2048):
+def get_baselines_and_activities(session_data, channel_id, fps=2048, which_trials='all'):
+    '''
+    Extracts the baseline and activity timesteps for a given channel and session.
+    Returns two lists of arrays, each array containing the baseline or activity timesteps for a trial.
+    
+    Parameters:
+    - session_data: dict, dictionary containing the data of a session
+    - channel_id: int, channel number
+    - fps: int, sampling frequency (default=2048)
+    - which_trials: str, the type of trials to consider. (default 'all')
+                    Possible values: 'all', 'execution', 'observation', 'large_object', 'small_object'
+                    
+    Returns:
+    - channel_baselines: list of arrays, timeseries of baseline for each trial
+    - channel_activity: list of arrays, timeseries of activity for each trial
+    '''
 
     trial_starts = session_data['trials_info']['TS_TrialStart']
     trial_action = session_data['trials_info']['TS_ObjectGrasp']
     no_errors = np.array(session_data['trials_info']['ErrorCode']) == 0
+    execution = np.array(session_data['trials_info']['ActionType']) == 'E'
+    observation = np.array(session_data['trials_info']['ActionType']) == 'O'
+    big = np.array(session_data['trials_info']['ObjectSize']) == 'B'
+    small = np.array(session_data['trials_info']['ObjectSize']) == 'S'
 
     channel_ts = session_data['neural_data'][channel_id]
     channel_baselines = []
-    channel_actions = []
+    channel_activity = []
     for i in range(len(trial_starts)):
         if no_errors[i]:
-            channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
-            channel_actions.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+            if which_trials == 'all':
+                channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
+                channel_activity.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+            elif which_trials == 'execution':
+                if execution[i]:
+                    channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
+                    channel_activity.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+            elif which_trials == 'observation':
+                if observation[i]:
+                    channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
+                    channel_activity.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+            elif which_trials == 'large_object':
+                if big[i]:
+                    channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
+                    channel_activity.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
+            elif which_trials == 'small_object':
+                if small[i]:
+                    channel_baselines.append(channel_ts[int((trial_starts[i]) * fps):int((trial_starts[i] + 1) * fps)])
+                    channel_activity.append(channel_ts[int((trial_action[i] - 0.5) * fps):int((trial_action[i] + 0.5) * fps)])
     
-    return channel_baselines, channel_actions
+    return channel_baselines, channel_activity
 
-def get_mean_baseline_and_activity (session_data, channel_id, fps=2048):
-
-    channel_baselines, channel_actions = get_baselines_and_activities(session_data, channel_id, fps)
+def get_mean_baseline_and_activity (session_data, channel_id, fps=2048, which_trials='all'):
+    '''
+    This function returns the mean baseline and mean activity of a channel for a given session.
+    
+    Parameters:
+    - session_data: dict, dictionary containing the data of a session
+    - channel_id: int, channel number
+    - fps: int, sampling frequency (default=2048)
+    - which_trials: str, the type of trials to consider. (default 'all')
+                    Possible values: 'all', 'execution', 'observation', 'large_object', 'small_object'
+    
+    Returns:
+    - mean_baseline: mean of the timeseries of the baseline of the channel
+    - mean_activity: mean of the timeseries of the activity of the channel
+    '''
+    
+    channel_baselines, channel_activity = get_baselines_and_activities(session_data, channel_id, fps, which_trials)
         
     mean_baseline = np.array(channel_baselines).mean(axis=0)
-    mean_action = np.array(channel_actions).mean(axis=0)
+    mean_activity = np.array(channel_activity).mean(axis=0)
     
-    return mean_baseline, mean_action
+    return mean_baseline, mean_activity
 
 
-def analyze_differences_between_baseline_and_activity (session, num_channels, plot, fps=2048, num_cols = 4, fig_width = 20):
+def analyze_differences_between_baseline_and_activity (session, num_channels, plot, fps=2048, num_cols = 4, fig_width = 20, which_trials='all', bad_channels = []):
     '''
     Analyze the differences between the baseline and activity for each channel in the session data.
     This function calculates the power spectral density, correlation, coherence, t-test between the baseline signal and activity signal for each channel.
@@ -324,6 +374,10 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
     - fps: int, the sampling rate of the data. (default 2048)
     - num_cols: int, the number of columns plot. (default 4)
     - fig_width: int, the width of the figure. (default 20)
+    - which_trials: str, the type of trials to consider. (default 'all')
+                    Possible values: 'all', 'execution', 'observation', 'large_object', 'small_object'
+    - bad_channels: list of int, the list of channels to ignore. (default [])
+    
     
     Returns:
     - list_baseline_psds: list of tuples, the power spectral density of the baseline for each channel.
@@ -338,8 +392,8 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
             The first element of the tuple is the frequency and the second is the coherence at that given frequency.
     - ttests: list of tuples, the t-test between the power spectral density of the baseline and activity for each channel.
     '''
-    
-    num_rows = np.ceil(num_channels / num_cols).astype(int)
+          
+    num_rows = np.ceil((num_channels) / num_cols).astype(int)
     fig_height = fig_width * num_rows / num_cols
 
     if plot : 
@@ -352,25 +406,26 @@ def analyze_differences_between_baseline_and_activity (session, num_channels, pl
     absolute_psd_difference = []
     ttests = []
     corr = []
-    cohe = []
-    
+    cohe = []    
 
     for i,row in enumerate(plot_ids):
-        for j, _ in enumerate(row):
+        for j, col in enumerate(row):
             if i*num_cols+j >= num_channels:
                 break
-            mean_baseline, mean_activity = get_mean_baseline_and_activity(session,i*num_cols+j)
-            baseline_psd = welch(mean_baseline, fs=fps)
+            if i*num_cols+j in bad_channels:
+                continue
+            mean_baseline, mean_activity = get_mean_baseline_and_activity(session,i*num_cols+j, fps, which_trials)
+            baseline_psd = welch(mean_baseline, fs=fps, noverlap=1)
             list_baseline_psds.append(baseline_psd)
-            list_activity_psds.append(welch(mean_activity, fs=fps))
-            activity_psd = welch(mean_activity, fs=fps)
+            activity_psd = welch(mean_activity, fs=fps, noverlap=1)
+            list_activity_psds.append(activity_psd)
             absolute_psd_difference.append(np.abs(activity_psd[1] - baseline_psd[1]))
             corr.append(correlate(mean_baseline, mean_activity))
             cohe.append(coherence(mean_baseline, mean_activity, fs=fps))
             ttests.append(ttest_rel(baseline_psd[1], activity_psd[1]))
             if plot:
                 axs[i][j].plot(baseline_psd[0],baseline_psd[1], label='baseline', alpha=0.5)
-                axs[i][j].plot(activity_psd[0],activity_psd[1], label='activity', alpha=0.5)
+                axs[i][j].plot(activity_psd[0][:20],activity_psd[1][:20], label='activity', alpha=0.5)
                 axs[i][j].plot(baseline_psd[0],absolute_psd_difference[-1], label='absolute difference', alpha=0.5)
                 axs[i][j].set_title(f'Power spectral density for channel {i*num_cols+j}')
                 axs[i][j].set_xlabel('frequency [Hz]')
