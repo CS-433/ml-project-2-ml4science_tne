@@ -89,12 +89,14 @@ Our code was run on Windows hardware.
 
 Questions 
 - When do we subsample ?
-    - Before or after 
+    - Before
 - How do handle the fact that participant does not have the same number of channels ?
     - Fill empty channels with None, 0 ?
     - Chose a certain number of channels ? 
 - Moving average, then UMAP ? PCA ? 
 - Mean of enveloppe to substract or addition to the enveloppe of each trial 
     - Enveloppe of raw signal or seperate by frequency band 
-
+- ML models to try 
+    - SVM, Random Forest, Logistic Regression
+    - Deep learning models with temporal dynamics, like LSTMs
 
