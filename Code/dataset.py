@@ -28,9 +28,10 @@ class participant:
     def get_features_all_sessions(self, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         dfs = []
         for session in self.sessions:
-            dft = []
+            trial_dict = {}
+            trial_dict['label'] = []
             for trial in session.trials:
-                trial_dict = {}
+                trial_dict['label'].append(trial.action_type)
                 for channel in self.relevant_channel:
                     for band_name, (low, high) in FREQ_BANDS.items():
                         signal = trial.get_signal()[channel]
@@ -42,10 +43,11 @@ class participant:
                             for i, start in enumerate(range(0, n - window_size + 1, step_size)):
                                 value = feature(signal[start:start + window_size])
                                 label = f'CH{channel}_{band_name}_{feature.__name__}_window_{i}'
-                                trial_dict[label] = value
-                dft['label'] = trial.action_type
-                dft.append(pd.DataFrame(trial_dict))            
-            dfs.append(dft)
+                                if label in trial_dict.keys():
+                                    trial_dict[label].append(value)
+                                else:
+                                    trial_dict[label] = [value]          
+            dfs.append(pd.DataFrame(trial_dict))
         return pd.concat(dfs)
     
 
@@ -91,11 +93,12 @@ class trials:
         self.trial_start = trials_info['TS_TrialStart'][trial_idx]
         trial_stop = trials_info['TS_HandBack'][trial_idx]
         
+        self.trial_idx = trial_idx
         self.trials_info = trials_info
         self.fs = fs
         self.action_type = trials_info['ActionType'][trial_idx]
         
-        signal = neural_data[:, int((self.trial_start) * fs):int((trial_stop + 1) * fs)]
+        signal = neural_data[:, int(self.trial_start * fs):int(trial_stop * fs)+1]
         signal = bandpass_filter(signal, 0.5, 150, fs)
         signal = noise_filter(signal, fs)
         self.signal = signal
@@ -114,23 +117,24 @@ class trials:
     
     def get_signal(self, trigger_start='TS_HandOut', trigger_stop='TS_HandBack', subsampling_frequency=SUBSAMPLING_FREQUENCY, baseline_correction=True, nb_samples=NB_SAMPLES):
         if trigger_start not in self.trials_info.keys() or trigger_stop not in self.trials_info.keys(): raise ValueError('Invalid trigger')
-        start_idx = int(self.trials_info[trigger_start] * self.fs) - int((self.trial_start) * self.fs)
-        stop_idx = int(self.trials_info[trigger_stop] * self.fs) - int((self.trial_start) * self.fs)
+        start_idx = int(self.trials_info[trigger_start][self.trial_idx] * self.fs) - int(self.trial_start * self.fs)
+        stop_idx = int(self.trials_info[trigger_stop][self.trial_idx] * self.fs) - int(self.trial_start * self.fs)
         signal = self.signal[:, start_idx:stop_idx]
         if subsampling_frequency:
             signal = subsample(signal, self.fs, subsampling_frequency)
         if baseline_correction:
-            signal = signal - self.get_mean_baseline()
+            signal = signal - np.outer(self.get_mean_baseline(), np.ones(np.shape(signal)[1]))
         if nb_samples:
-            signal = resample(signal, NB_SAMPLES)
+            signal = resample(signal, NB_SAMPLES, axis=1)
         return signal
     
     def get_pds_baseline(self, channel_idx):
         return welch(self.baseline_signal[channel_idx], fs=self.fs)
     
     def get_pds_aroundObjGrasped(self, channel_idx):
-        start_idx = int((self.trials_info['TS_ObjectGrasp'] - 0.5) * self.fs) - int((self.trial_start) * self.fs)
-        stop_idx = int((self.trials_info['TS_ObjectGrasp'] + 0.5) * self.fs) - int((self.trial_start) * self.fs)
+        objectGrasp = self.trials_info['TS_ObjectGrasp'][self.trial_idx]
+        start_idx = int((objectGrasp - 0.5) * self.fs) - int(self.trial_start * self.fs)
+        stop_idx = int((objectGrasp + 0.5) * self.fs) - int(self.trial_start * self.fs)
         return welch(self.signal[channel_idx, start_idx:stop_idx], fs=self.fs)
     
 def subsample(signal, fs, subsampling_frequency):
@@ -171,5 +175,5 @@ def noise_filter(signal, fs, nb_harmonics=2):
     return signal
 
 
-participant('s6')
+
 

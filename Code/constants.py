@@ -20,6 +20,14 @@ FREQ_BANDS = {
     "Gamma": (30, 100),
     "HighGamma": (100, 150)
 }
+FREQ_BANDS2 = {
+    "Delta": (0.5, 4),
+    "Theta": (4, 8),
+    "Alpha": (8, 13),
+    "Beta": (13, 30),
+    "Gamma": (30, 100),
+    "HighGamma": (100, 150)
+}
 # Features 
 FEATURES = [np.mean, np.std]
 # Moving average
