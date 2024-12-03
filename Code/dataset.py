@@ -83,7 +83,6 @@ class session:
         # TRIALS
         self.no_error = np.array(trials_info['ErrorCode']) == 0
         self.nb_trials = len(trials_info['TS_TrialStart'])
-        ## TODO: do not put trials with error ! (the case now, why???)
         self.trials = [trials(i, self.fs,  self.neural_data, trials_info) for i in range(self.nb_trials) if self.no_error[i]]
         
 class trials: 
