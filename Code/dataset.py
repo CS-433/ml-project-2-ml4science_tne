@@ -28,15 +28,44 @@ class Participant:
             Channel(self.channels_labels[i], i, self.channels_locations[i], self.name, self.sessions)
             for i in range(self.nb_channels)
         ]
-        self.relevant_channels = [channel for channel in self.channels if channel.p_value < alpha]
+        self.relevant_channels = [channel for channel in self.channels if channel.p_value_Ex < alpha and channel.p_value_Obs < alpha]
 
-    def get_features_per_session(self, session, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         trial_dict = {}
         trial_dict['label'] = []
         for trial in session.trials:
             trial_dict['label'].append(trial.action_type)
-            for channel in self.relevant_channels:
-                for band_name, (low, high) in FREQ_BANDS.items():
+            trial_dict = self.get_features(trial_dict, trial, session, freq_band, features, window_size, step_size)
+                                       
+        return pd.DataFrame_ExObs(trial_dict)
+
+    def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        return pd.concat([
+            self.get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            for session in self.sessions
+        ])
+        
+    def get_features_per_session_mvt(self, session, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        if not (data=='E' or data=='O'): raise ValueError('Invalid data')
+        trial_dict = {}
+        trial_dict['label'] = []
+        for trial in session.trials:
+            if trial.action_type != data: continue
+            trial_dict['label'].append(trial.object_size)
+            trial_dict = self.get_features(trial_dict, trial, session, freq_band, features, window_size, step_size) 
+                                       
+        return pd.DataFrame(trial_dict)
+    
+    def get_features_all_sessions_mvt(self, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        if not (data!='E' or data!='O'): raise ValueError('Invalid data')
+        return pd.concat([
+            self.get_features_per_session_mvt(session, data, freq_band, features, window_size, step_size)
+            for session in self.sessions
+        ])
+    
+    def get_features(self, trial_dict, trial, session, freq_band, features, window_size, step_size):
+        for channel in self.relevant_channels:
+                for band_name, (low, high) in freq_band.items():
                     signal = trial.get_signal()[channel.idx]
                     signal = bandpass_filter(signal, low, high, session.fs)
                     signal = hilbert(signal)
@@ -49,15 +78,8 @@ class Participant:
                             if label in trial_dict.keys():
                                 trial_dict[label].append(value)
                             else:
-                                trial_dict[label] = [value]   
-                                       
-        return pd.DataFrame(trial_dict)
-
-    def get_features_all_sessions(self, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        return pd.concat([
-            self.get_features_per_session(session, features, window_size, step_size)
-            for session in self.sessions
-        ])
+                                trial_dict[label] = [value] 
+        return trial_dict
     
 
 class Channel:
@@ -67,20 +89,33 @@ class Channel:
         self.location = location
         self.participant = participant
         
-        pds_baseline = []
-        pds_aroundObjGrasped = []
+        pds_baseline_Ex = []
+        pds_aroundObjGrasped_Ex = []
+        
+        pds_baseline_Obs = []
+        pds_aroundObjGrasped_Obs = []
         
         for session in sessions:
             for trial in session.trials:
-                pds_baseline.append(trial.get_pds_baseline(idx))
-                pds_aroundObjGrasped.append(trial.get_pds_aroundObjGrasped(idx))
+                if trial.action_type == 'E':
+                    pds_baseline_Ex.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_Ex.append(trial.get_pds_aroundObjGrasped(idx))
+                if trial.action_type == 'O':
+                    pds_baseline_Obs.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_Obs.append(trial.get_pds_aroundObjGrasped(idx))
                 
-        self.pds_baseline = np.mean(np.array(pds_baseline), axis=0)
-        self.pds_aroundObjGrasped = np.mean(np.array(pds_aroundObjGrasped), axis=0)
+        self.pds_baseline_Ex = np.mean(np.array(pds_baseline_Ex), axis=0)
+        self.pds_aroundObjGrasped_Ex = np.mean(np.array(pds_aroundObjGrasped_Ex), axis=0)
+        self.pds_baseline_Obs = np.mean(np.array(pds_baseline_Obs), axis=0)
+        self.pds_aroundObjGrasped_Obs = np.mean(np.array(pds_aroundObjGrasped_Obs), axis=0)
         
-        self.absolute_psd_difference = np.abs(self.pds_aroundObjGrasped - self.pds_baseline)
-        self.corr = correlate(self.pds_baseline, self.pds_aroundObjGrasped)
-        self.t_stat, self.p_value = ttest_rel(self.pds_baseline[1], self.pds_aroundObjGrasped[1])
+        self.absolute_psd_difference_Ex = np.abs(self.pds_aroundObjGrasped_Ex - self.pds_baseline_Ex)
+        self.corr_Ex = correlate(self.pds_baseline_Ex, self.pds_aroundObjGrasped_Ex)
+        self.t_stat_Ex, self.p_value_Ex = ttest_rel(self.pds_baseline_Ex[1], self.pds_aroundObjGrasped_Ex[1])
+        
+        self.absolute_psd_difference_Obs = np.abs(self.pds_aroundObjGrasped_Obs - self.pds_baseline_Obs)
+        self.corr_Obs = correlate(self.pds_baseline_Obs, self.pds_aroundObjGrasped_Obs)
+        self.t_stat_Obs, self.p_value_Obs = ttest_rel(self.pds_baseline_Obs[1], self.pds_aroundObjGrasped_Obs[1])
 
     
 class Session: 
@@ -109,6 +144,7 @@ class Trials:
         self.trials_info = trials_info
         self.fs = fs
         self.action_type = trials_info['ActionType'][trial_idx]
+        self.object_size = trials_info['ObjectSize'][trial_idx]
         
         signal = neural_data[:, int(self.trial_start * fs):int(trial_stop * fs)+1]
         signal = bandpass_filter(signal, 0.5, 150, fs)
@@ -147,13 +183,13 @@ class Trials:
         return signal
     
     def get_pds_baseline(self, channel_idx):
-        return welch(self.baseline_signal[channel_idx], fs=self.fs)
+        return welch(self.baseline_signal[channel_idx], fs=self.fs, nperseg=self.fs/2)
     
     def get_pds_aroundObjGrasped(self, channel_idx):
         objectGrasp = self.trials_info['TS_ObjectGrasp'][self.trial_idx]
         start_idx = int((objectGrasp - 0.5) * self.fs) - int(self.trial_start * self.fs)
         stop_idx = int((objectGrasp + 0.5) * self.fs) - int(self.trial_start * self.fs)
-        return welch(self.signal[channel_idx, start_idx:stop_idx], fs=self.fs)
+        return welch(self.signal[channel_idx, start_idx:stop_idx], fs=self.fs, nperseg=self.fs/2)
     
 def subsample(signal, fs, subsampling_frequency):
     step = fs // subsampling_frequency
@@ -192,8 +228,16 @@ def noise_filter(signal, fs, nb_harmonics=2):
         
     return signal
 
+# def get_features_across_participants_ExObs(participants=PARTICIPANTS):
+#     for participant in participants:
+#         participant = Participant(participant)
+#         df = participant.get_features_all_sessions_ExObs()
+        
+
 if __name__ == '__main__':
-    p = Participant('s6')
-    df = p.get_features_all_sessions()
+    p = Participant('s12')
+    # df = p.get_features_all_sessions_ExObs()
+    df = p.get_features_all_sessions_mvt(data='E')
+    
 
 

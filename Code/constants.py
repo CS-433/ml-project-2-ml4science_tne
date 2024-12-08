@@ -10,7 +10,7 @@ SUBSAMPLING_FREQUENCY = 500
 # Number of samples per trial for duration normalization
 NB_SAMPLES = 1500
 # Alpha for the relevant channels
-ALPHA = 0.05
+ALPHA = 0.1
 # Frequency bands for separating data by frequency
 FREQ_BANDS = {
     "Delta": (0.5, 4),
@@ -33,3 +33,5 @@ FEATURES = [np.mean, np.std]
 # Moving average
 WINDOW_SIZE = 100
 STEP_SIZE = 10
+# Participants
+PARTICIPANTS = ['s6', 's7', 's11', 's12']
