@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt 
+from tqdm import tqdm
 from scipy.signal import resample
 from scipy.signal import hilbert
 from scipy.signal import welch, correlate
@@ -33,11 +35,11 @@ class Participant:
     def get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         trial_dict = {}
         trial_dict['label'] = []
-        for trial in session.trials:
+        for trial in tqdm(session.trials):
             trial_dict['label'].append(trial.action_type)
-            trial_dict = self.get_features(trial_dict, trial, session, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size)
                                        
-        return pd.DataFrame_ExObs(trial_dict)
+        return pd.DataFrame(trial_dict)
 
     def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         return pd.concat([
@@ -49,10 +51,10 @@ class Participant:
         if not (data=='E' or data=='O'): raise ValueError('Invalid data')
         trial_dict = {}
         trial_dict['label'] = []
-        for trial in session.trials:
+        for trial in tqdm(session.trials):
             if trial.action_type != data: continue
             trial_dict['label'].append(trial.object_size)
-            trial_dict = self.get_features(trial_dict, trial, session, freq_band, features, window_size, step_size) 
+            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size) 
                                        
         return pd.DataFrame(trial_dict)
     
@@ -63,25 +65,82 @@ class Participant:
             for session in self.sessions
         ])
     
-    def get_features(self, trial_dict, trial, session, freq_band, features, window_size, step_size):
-        for channel in self.relevant_channels:
-                for band_name, (low, high) in freq_band.items():
-                    signal = trial.get_signal()[channel.idx]
-                    signal = bandpass_filter(signal, low, high, session.fs)
-                    signal = hilbert(signal)
-                    signal = np.abs(signal)
-                    for feature in features:
-                        n = len(signal)
-                        for i, start in enumerate(range(0, n - window_size + 1, step_size)):
-                            value = feature(signal[start:start + window_size])
-                            label = f'CH{channel.idx}_{band_name}_{feature.__name__}_window_{i}'
-                            if label in trial_dict.keys():
-                                trial_dict[label].append(value)
-                            else:
-                                trial_dict[label] = [value] 
+    def get_features(self, trial_dict, trial, freq_band, features, window_size, step_size):
+        for channel in tqdm(self.relevant_channels):
+            for band_name, (low, high) in freq_band.items():
+                signal = trial.get_preprocessed_signal(channel, low, high)
+                for feature in features:
+                    n = len(signal)
+                    for i, start in enumerate(range(0, n - window_size + 1, step_size)):
+                        value = feature(signal[start:start + window_size])
+                        label = f'CH{channel.idx}_{band_name}_{feature.__name__}_window_{i}'
+                        if label in trial_dict.keys():
+                            trial_dict[label].append(value)
+                        else:
+                            trial_dict[label] = [value] 
         return trial_dict
     
-
+    def plot_channel_responsiveness(self, dB=True):
+        
+        num_cols = 4
+        fig_width = 20
+        num_rows = int(np.ceil(self.nb_channels / num_cols))
+        fig_height = fig_width * num_rows / num_cols
+        _, axs = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height), sharey=False)
+        axs = axs.flatten()
+        
+        for channel_id in tqdm(range(self.nb_channels)):
+            channel = self.channels[channel_id]
+            if dB:
+                axs[channel_id].plot(channel.pds_baseline_Ex[0], 10*np.log10(channel.pds_baseline_Ex[1]), label='baseline Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], 10*np.log10(channel.pds_aroundObjGrasped_Ex[1]), label='aroundObjGrasped Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], np.log10(channel.pds_baseline_Ex[1])/np.log10(channel.pds_aroundObjGrasped_Ex[1]), label='absolute difference Ex')
+                axs[channel_id].plot(channel.pds_baseline_Obs[0], 10*np.log10(channel.pds_baseline_Obs[1]), label='baseline Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], 10*np.log10(channel.pds_aroundObjGrasped_Obs[1]), label='aroundObjGrasped Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], np.log10(channel.pds_baseline_Obs[1])/np.log10(channel.pds_aroundObjGrasped_Obs[1]), label='absolute difference Obs')         
+            else:
+                axs[channel_id].plot(channel.pds_baseline_Ex[0], channel.pds_baseline_Ex[1], label='baseline Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], channel.pds_aroundObjGrasped_Ex[1], label='aroundObjGrasped Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], abs(channel.pds_baseline_Ex[1] - channel.pds_aroundObjGrasped_Ex[1]), label='absolute difference Ex')
+                axs[channel_id].plot(channel.pds_baseline_Obs[0], channel.pds_baseline_Obs[1], label='baseline Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], channel.pds_aroundObjGrasped_Obs[1], label='aroundObjGrasped Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], abs(channel.pds_baseline_Obs[1] - channel.pds_aroundObjGrasped_Obs[1]), label='absolute difference Obs')
+            
+            if channel in self.relevant_channels:
+                axs[channel_id].set_title(f'Power spectral density for channel {channel_id} - RESPONSIVE')
+            else:
+                axs[channel_id].set_title(f'Power spectral density for channel {channel_id}')
+            
+            axs[channel_id].set_xlabel('frequency [Hz]')
+            axs[channel_id].set_ylabel('PSD [V**2/Hz]')
+            axs[channel_id].set_xlim(0, 150)
+            axs[channel_id].legend()
+            axs[channel_id].grid()
+            
+        plt.tight_layout()
+        plt.show()
+        
+    def plot_preprocessed_signal(self, trial=None):
+        
+        num_cols = len(FREQ_BANDS)
+        fig_width = 20
+        num_rows = int(len(self.relevant_channels))
+        fig_height = fig_width * num_rows / num_cols
+        _, axs = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height), sharey=False)
+                
+        if not trial:
+            trial = self.sessions[0].trials[0]
+        
+        for i, channel in enumerate(self.relevant_channels):
+            for j, band in enumerate(FREQ_BANDS.keys()):
+                signal = trial.get_preprocessed_signal(channel, FREQ_BANDS[band][0], FREQ_BANDS[band][1])
+                axs[i, j].plot(signal)
+                axs[i, j].set_title(f'Channel {channel.idx} - {band}')
+                axs[i, j].grid()
+                
+        plt.tight_layout()
+        plt.show()
+        
 class Channel:
     def __init__(self, name, idx, location, participant, sessions):
         self.name = name
@@ -182,6 +241,13 @@ class Trials:
 
         return signal
     
+    def get_preprocessed_signal(self, channel, low, high):
+        signal = self.get_signal()[channel.idx]
+        signal = bandpass_filter(signal, low, high, self.fs)
+        signal = hilbert(signal)
+        signal = np.abs(signal)
+        return signal
+    
     def get_pds_baseline(self, channel_idx):
         return welch(self.baseline_signal[channel_idx], fs=self.fs, nperseg=self.fs/2)
     
@@ -235,7 +301,7 @@ def noise_filter(signal, fs, nb_harmonics=2):
         
 
 if __name__ == '__main__':
-    p = Participant('s12')
+    p = Participant('s6')
     # df = p.get_features_all_sessions_ExObs()
     df = p.get_features_all_sessions_mvt(data='E')
     
