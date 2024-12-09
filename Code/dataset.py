@@ -1,300 +1,304 @@
 import numpy as np
 import pandas as pd
-from scipy.ndimage import convolve1d
+import matplotlib.pyplot as plt 
+from tqdm import tqdm
+from scipy.signal import resample
+from scipy.signal import hilbert
+from scipy.signal import welch, correlate
+from scipy.stats import ttest_rel
 
 from utils import *
 from constants import *
 
-def get_dataset(data_path='../Data/Dataset_4subjects_Exe_Obs', type='without_normalization', norm_before_sep=False, norm_after_sep=False):
-    """
-    Load and preprocess the dataset
-
-    Args:
-        data_path (str, optional): _description_. Defaults to '../Data/Dataset_4subjects_Exe_Obs'.
-        type (str, optional): _description_. Defaults to 'without_normalization'.
-
-    Returns:
-        _type_: _description_
-    """
-    
-    data = load_pickle(data_path)
-    data = remove_bad_channels(data)
-    data = remove_electrical_noise(data)
-    
-    df_trials = separate_trials(data)
-    df_trials = baseline_correction(df_trials)
-    
-    if norm_before_sep:
-        df_trials = normalize(df_trials)
+class Participant:
+    def __init__(self, name, data_path=DATA_PATH, alpha=ALPHA):
+        self.name = name
+        data = load_pickle(data_path)
+        self.sessions = [
+            Session(sess,
+                    data[self.name][sess]['fs'],
+                    data[self.name][sess]['neural_data'],
+                    data[self.name][sess]['trials_info'])
+                for sess in data[self.name].keys()
+            ]
         
-    df_trials = subsample(df_trials)
-    
-    if norm_after_sep:
-        df_trials = normalize(df_trials)
+        # CHANNELS 
+        self.channels_locations = data[self.name]['sess1']['channel_locations'][0]
+        self.channels_labels = data[self.name]['sess1']['channel_labels']
+        self.nb_channels = len(self.channels_locations)
+        self.channels = [
+            Channel(self.channels_labels[i], i, self.channels_locations[i], self.name, self.sessions)
+            for i in range(self.nb_channels)
+        ]
+        self.relevant_channels = [channel for channel in self.channels if channel.p_value_Ex < alpha and channel.p_value_Obs < alpha]
+
+    def get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        trial_dict = {}
+        trial_dict['label'] = []
+        for trial in tqdm(session.trials):
+            trial_dict['label'].append(trial.action_type)
+            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size)
+                                       
+        return pd.DataFrame(trial_dict)
+
+    def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        return pd.concat([
+            self.get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            for session in self.sessions
+        ])
         
-    df_trials = separate_frequency_bands(df_trials)
-    df_trials = standardize_duration(df_trials)
-    return df_trials
+    def get_features_per_session_mvt(self, session, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        if not (data=='E' or data=='O'): raise ValueError('Invalid data')
+        trial_dict = {}
+        trial_dict['label'] = []
+        for trial in tqdm(session.trials):
+            if trial.action_type != data: continue
+            trial_dict['label'].append(trial.object_size)
+            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size) 
+                                       
+        return pd.DataFrame(trial_dict)
     
-def remove_bad_channels(data, bad_channels=BAD_CHANNELS):
-    """
-    Remove bad channels from the dataset
-
-    Args:
-        df (dictionary): dataset
-        bad_channels (list, optional): list of bad channels. Defaults to BAD_CHANNELS.
-
-    Returns:
-        dictionary: dataset without bad channels 
-    """
+    def get_features_all_sessions_mvt(self, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        if not (data!='E' or data!='O'): raise ValueError('Invalid data')
+        return pd.concat([
+            self.get_features_per_session_mvt(session, data, freq_band, features, window_size, step_size)
+            for session in self.sessions
+        ])
     
-    return data
+    def get_features(self, trial_dict, trial, freq_band, features, window_size, step_size):
+        for channel in tqdm(self.relevant_channels):
+            for band_name, (low, high) in freq_band.items():
+                signal = trial.get_preprocessed_signal(channel, low, high)
+                for feature in features:
+                    n = len(signal)
+                    for i, start in enumerate(range(0, n - window_size + 1, step_size)):
+                        value = feature(signal[start:start + window_size])
+                        label = f'CH{channel.idx}_{band_name}_{feature.__name__}_window_{i}'
+                        if label in trial_dict.keys():
+                            trial_dict[label].append(value)
+                        else:
+                            trial_dict[label] = [value] 
+        return trial_dict
     
-    
-def remove_electrical_noise(data):
-    """
-    Remove electrical noise from the dataset
-
-    Args:
-        data (dictionary): dataset
-
-    Returns:
-        dictionary: dataset with applied notch filter to remove electrical noise
-    """
-    # TODO find a better way to remove all electrical noise in one sweep
-    elec_noise = [(k*50-2, k*50+2) for k in range(1, 3)]
-    # Apply bandstop filter to remove electrical noise
-    # For each participant
-    for participant in data.keys():
-        # For each session
-        for session in data[participant].keys():
-            # For each channel in list of channels
-            for channel in range(len(data[participant][session]['neural_data'])):
-                # For each noise freq.
-                for noise_freq in elec_noise:
-                    data[participant][session]['neural_data'][channel] = \
-                        bandstop_filter(data[participant][session]['neural_data'][channel], noise_freq[0], noise_freq[1])
-
-    return data
-    
-def separate_trials(data):
-    """
-    Separate the dataset into trials & remove trials with errors
-
-    Args:
-        data (dictionary): dataset
-
-    Returns:
-        dictionary: dataframe with separated trials (participants, session, obs/ex, neural_data)
-    """
-    
-    
-    df = pd.DataFrame(data)
-    
-    return df
-    
-def baseline_correction(df, method='single'):
-    """
-    Apply baseline correction to the dataset
-
-    Args:
-        data (DataFrame): dataset
-        method ('single'|'mean'): method to apply the baseline correction. Defaults to 'single'.
-
-    Returns:
-        DataFrame: dataset with applied baseline correction
-    """
-    # baseline_data = separate_segments(df, 'TS_TrialStart', 'TS_CueON')
-    # # Is experiment going from TrialStart, CueOn or GoSignal
-    # experiment_data = separate_segments(df, 'TS_CueOn', 'TS_HandBack')
-    
-    # if method == 'mean':
-    #     baseline = np.mean(baseline_data)
-    # elif method == 'single':
-    #     baseline = np.median(baseline_data)
-    # else:
-    #     raise ValueError('Invalid method')
-    
-    return df
-    
-def separate_segments(df, trigger1, trigger2):
-    """
-    Separate the dataset into segments
-
-    Args:
-        data (DataFrame): dataset
-        trigger1 (str): first trigger
-        trigger2 (str): second trigger
-
-    Returns:
-        DataFrame: dataset with separated segments
-    """
-    
-    return df
-
-def normalize(df):
-    """
-    Normalize the dataset
-
-    Args:
-        data (DataFrame): dataset
-
-    Returns:
-        DataFrame: dataset with normalized data
-    """
-    
-    return df
-
-def subsample(df, subsampling_frequency=FS//SUBSAMPLING_FREQUENCY):
-    """
-    Subsample the dataset
-
-    Args:
-        data (DataFrame): dataset
-        subsampling_frequency (int, optional): subsampling frequency. Defaults to SUBSAMPLING_FREQUENCY.
-
-    Returns:
-        DataFrame: dataset with subsampled data
-    """
-    
-    dfc = df.copy(deep=True)
-    dfc['sub_neural_data'] = df['neural_data'].apply(lambda channels: channels[::subsampling_frequency])
-    dfc = dfc.drop(['neural_data'], axis=1)
-    return dfc
-
-def separate_frequency_bands(df, freq_bands=FREQ_BANDS):
-    """
-    Separate the dataset into frequency bands
-
-    Args:
-        data (DataFrame): dataset
-        freq_bands (dict, optional): frequency bands. Defaults to FREQ_BANDS.
-
-    Returns:
-        DataFrame: dataset with separated frequency bands & channels (participants, session, obs/ex, channel1_alpha, ...)
-    """
-    dfc = df.copy()
-    max_nb_channels = get_max_nb_channels(dfc)
-    
-    def sep_signal_in_freqs(row):
-        signal = row['sub_neural_data']
-    
-        new_cols = []
-        for channel_idx in range(max_nb_channels):
-            if channel_idx < len(signal):
-                # Remove frequencies that are too low (noise) or too high (not eeg-related)
-                channel = bandpass_filter(signal[channel_idx], 0.5, 150)
-                for band_name, (low, high) in freq_bands.items():
-                    # Bandpass filter the channel
-                    filtered_channel = bandpass_filter(channel, low, high)
-                    # Take the envelope of the frequency band with a Hilbert transform
-                    enveloped_channel = hilbert(rectified_channel)
-                    enveloped_channel = np.abs(enveloped_channel)
-                    new_cols.append(enveloped_channel)
+    def plot_channel_responsiveness(self, dB=True):
+        
+        num_cols = 4
+        fig_width = 20
+        num_rows = int(np.ceil(self.nb_channels / num_cols))
+        fig_height = fig_width * num_rows / num_cols
+        _, axs = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height), sharey=False)
+        axs = axs.flatten()
+        
+        for channel_id in tqdm(range(self.nb_channels)):
+            channel = self.channels[channel_id]
+            if dB:
+                axs[channel_id].plot(channel.pds_baseline_Ex[0], 10*np.log10(channel.pds_baseline_Ex[1]), label='baseline Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], 10*np.log10(channel.pds_aroundObjGrasped_Ex[1]), label='aroundObjGrasped Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], np.log10(channel.pds_baseline_Ex[1])/np.log10(channel.pds_aroundObjGrasped_Ex[1]), label='absolute difference Ex')
+                axs[channel_id].plot(channel.pds_baseline_Obs[0], 10*np.log10(channel.pds_baseline_Obs[1]), label='baseline Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], 10*np.log10(channel.pds_aroundObjGrasped_Obs[1]), label='aroundObjGrasped Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], np.log10(channel.pds_baseline_Obs[1])/np.log10(channel.pds_aroundObjGrasped_Obs[1]), label='absolute difference Obs')         
             else:
-                for _ in range(len(freq_bands)):
-                    new_cols.append(None)
+                axs[channel_id].plot(channel.pds_baseline_Ex[0], channel.pds_baseline_Ex[1], label='baseline Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], channel.pds_aroundObjGrasped_Ex[1], label='aroundObjGrasped Ex', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Ex[0], abs(channel.pds_baseline_Ex[1] - channel.pds_aroundObjGrasped_Ex[1]), label='absolute difference Ex')
+                axs[channel_id].plot(channel.pds_baseline_Obs[0], channel.pds_baseline_Obs[1], label='baseline Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], channel.pds_aroundObjGrasped_Obs[1], label='aroundObjGrasped Obs', alpha=0.5)
+                axs[channel_id].plot(channel.pds_aroundObjGrasped_Obs[0], abs(channel.pds_baseline_Obs[1] - channel.pds_aroundObjGrasped_Obs[1]), label='absolute difference Obs')
+            
+            if channel in self.relevant_channels:
+                axs[channel_id].set_title(f'Power spectral density for channel {channel_id} - RESPONSIVE')
+            else:
+                axs[channel_id].set_title(f'Power spectral density for channel {channel_id}')
+            
+            axs[channel_id].set_xlabel('frequency [Hz]')
+            axs[channel_id].set_ylabel('PSD [V**2/Hz]')
+            axs[channel_id].set_xlim(0, 150)
+            axs[channel_id].legend()
+            axs[channel_id].grid()
+            
+        plt.tight_layout()
+        plt.show()
+        
+    def plot_preprocessed_signal(self, trial=None):
+        
+        num_cols = len(FREQ_BANDS)
+        fig_width = 20
+        num_rows = int(len(self.relevant_channels))
+        fig_height = fig_width * num_rows / num_cols
+        _, axs = plt.subplots(num_rows, num_cols, figsize=(fig_width, fig_height), sharey=False)
                 
-        return tuple(new_cols)
+        if not trial:
+            trial = self.sessions[0].trials[0]
+        
+        for i, channel in enumerate(self.relevant_channels):
+            for j, band in enumerate(FREQ_BANDS.keys()):
+                signal = trial.get_preprocessed_signal(channel, FREQ_BANDS[band][0], FREQ_BANDS[band][1])
+                axs[i, j].plot(signal)
+                axs[i, j].set_title(f'Channel {channel.idx} - {band}')
+                axs[i, j].grid()
+                
+        plt.tight_layout()
+        plt.show()
+        
+class Channel:
+    def __init__(self, name, idx, location, participant, sessions):
+        self.name = name
+        self.idx = idx
+        self.location = location
+        self.participant = participant
+        
+        pds_baseline_Ex = []
+        pds_aroundObjGrasped_Ex = []
+        
+        pds_baseline_Obs = []
+        pds_aroundObjGrasped_Obs = []
+        
+        for session in sessions:
+            for trial in session.trials:
+                if trial.action_type == 'E':
+                    pds_baseline_Ex.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_Ex.append(trial.get_pds_aroundObjGrasped(idx))
+                if trial.action_type == 'O':
+                    pds_baseline_Obs.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_Obs.append(trial.get_pds_aroundObjGrasped(idx))
+                
+        self.pds_baseline_Ex = np.mean(np.array(pds_baseline_Ex), axis=0)
+        self.pds_aroundObjGrasped_Ex = np.mean(np.array(pds_aroundObjGrasped_Ex), axis=0)
+        self.pds_baseline_Obs = np.mean(np.array(pds_baseline_Obs), axis=0)
+        self.pds_aroundObjGrasped_Obs = np.mean(np.array(pds_aroundObjGrasped_Obs), axis=0)
+        
+        self.absolute_psd_difference_Ex = np.abs(self.pds_aroundObjGrasped_Ex - self.pds_baseline_Ex)
+        self.corr_Ex = correlate(self.pds_baseline_Ex, self.pds_aroundObjGrasped_Ex)
+        self.t_stat_Ex, self.p_value_Ex = ttest_rel(self.pds_baseline_Ex[1], self.pds_aroundObjGrasped_Ex[1])
+        
+        self.absolute_psd_difference_Obs = np.abs(self.pds_aroundObjGrasped_Obs - self.pds_baseline_Obs)
+        self.corr_Obs = correlate(self.pds_baseline_Obs, self.pds_aroundObjGrasped_Obs)
+        self.t_stat_Obs, self.p_value_Obs = ttest_rel(self.pds_baseline_Obs[1], self.pds_aroundObjGrasped_Obs[1])
+
     
-    new_cols = ([f'channel{channel}_{band_name}' for channel in range(max_nb_channels) for band_name in freq_bands.keys()])
-    dfc[new_cols] = dfc.apply(sep_signal_in_freqs, axis=1, result_type='expand')
-    dfc = dfc.drop(['sub_neural_data'], axis=1)
-    return dfc
+class Session: 
+    def __init__(self, name, fs, neural_data, trials_info):
+        self.name = name
+        self.fs = fs
+        self.neural_data = neural_data
+        
+        # TRIALS
+        self.no_error = np.array(trials_info['ErrorCode']) == 0
+        self.nb_trials = len(trials_info['TS_TrialStart'])
+        self.trials = [
+            Trials(i, self.fs,  self.neural_data, trials_info)
+            for i in range(self.nb_trials)
+            if self.no_error[i]
+        ]
+        
+class Trials: 
+    def __init__(self, trial_idx, fs, neural_data, trials_info):
+        trial_baseline_start = trials_info['TS_TrialStart'][trial_idx]
+        trial_baseline_stop = trials_info['TS_CueOn'][trial_idx]
+        self.trial_start = trials_info['TS_TrialStart'][trial_idx]
+        trial_stop = trials_info['TS_HandBack'][trial_idx]
+        
+        self.trial_idx = trial_idx
+        self.trials_info = trials_info
+        self.fs = fs
+        self.action_type = trials_info['ActionType'][trial_idx]
+        self.object_size = trials_info['ObjectSize'][trial_idx]
+        
+        signal = neural_data[:, int(self.trial_start * fs):int(trial_stop * fs)+1]
+        signal = bandpass_filter(signal, 0.5, 150, fs)
+        signal = noise_filter(signal, fs)
+        self.signal = signal
+        
+        baseline = neural_data[:, int(trial_baseline_start * fs):int(trial_baseline_stop * fs)]
+        baseline = bandpass_filter(baseline, 0.5, 150, fs)
+        baseline = noise_filter(baseline, fs)
+        self.baseline_signal = baseline
+        
+    def get_mean_baseline(self):
+        return np.mean(self.baseline_signal, axis=1)
+    
+    def get_subsampled_baseline(self, subsampling_frequency=SUBSAMPLING_FREQUENCY):
+        return subsample(self.baseline_signal, self.fs, subsampling_frequency)
+    
+    def get_signal(
+            self, trigger_start='TS_HandOut', trigger_stop='TS_HandBack',
+            subsampling_frequency=SUBSAMPLING_FREQUENCY, baseline_correction=True, nb_samples=NB_SAMPLES):
+        
+        if trigger_start not in self.trials_info.keys() or trigger_stop not in self.trials_info.keys():
+            raise ValueError('Invalid trigger')
+        
+        start_idx = int(self.trials_info[trigger_start][self.trial_idx] * self.fs) - int(self.trial_start * self.fs)
+        stop_idx = int(self.trials_info[trigger_stop][self.trial_idx] * self.fs) - int(self.trial_start * self.fs)
+        signal = self.signal[:, start_idx:stop_idx]
 
+        if subsampling_frequency:
+            signal = subsample(signal, self.fs, subsampling_frequency)
+        if baseline_correction:
+            signal = signal - np.outer(self.get_mean_baseline(), np.ones(np.shape(signal)[1]))
+        if nb_samples:
+            signal = resample(signal, NB_SAMPLES, axis=1)
 
-def standardize_duration(df):
+        return signal
+    
+    def get_preprocessed_signal(self, channel, low, high):
+        signal = self.get_signal()[channel.idx]
+        signal = bandpass_filter(signal, low, high, self.fs)
+        signal = hilbert(signal)
+        signal = np.abs(signal)
+        return signal
+    
+    def get_pds_baseline(self, channel_idx):
+        return welch(self.baseline_signal[channel_idx], fs=self.fs, nperseg=self.fs/2)
+    
+    def get_pds_aroundObjGrasped(self, channel_idx):
+        objectGrasp = self.trials_info['TS_ObjectGrasp'][self.trial_idx]
+        start_idx = int((objectGrasp - 0.5) * self.fs) - int(self.trial_start * self.fs)
+        stop_idx = int((objectGrasp + 0.5) * self.fs) - int(self.trial_start * self.fs)
+        return welch(self.signal[channel_idx, start_idx:stop_idx], fs=self.fs, nperseg=self.fs/2)
+    
+def subsample(signal, fs, subsampling_frequency):
+    step = fs // subsampling_frequency
+    return signal[:, ::step]
+
+def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     """
-    Standardize the duration of the dataset
+    Apply a bandpass filter to the input signal.
 
     Args:
-        data (DataFrame): dataset
+        signal (ndarray): (nb_channels, nb_timepoints) NumPy array, the signal to filter.
+        lowcut (float): lower frequency of the band (Hz).
+        highcut (float): higher frequency of the band (Hz).
+        fs (float): sampling frequency of the signal (Hz). 
+        order (int, optional): the order of the filter. Defaults to 4.
 
     Returns:
-        DataFrame: dataset with standardized duration
+        filtered_data (ndarray): (nb_channels, nb_timepoints) NumPy array, the filtered signal.
     """
-    
-    return df
+    if lowcut >= highcut:
+        raise ValueError("Lowcut frequency must be less than highcut frequency.")
+        
+    if fs <= 2 * highcut:
+        raise ValueError("Sampling frequency must respect the Nyquist criteria.")
+        
+    sos = butter(order, [lowcut, highcut], btype='band', fs=fs, output='sos')
+    return sosfiltfilt(sos, signal)
 
-def get_trials(session_data, channel, fps):
-    '''
-    Get the trials from the session data for a given channel.
-    
-    Parameters:
-    - session_data: dict, the data of a session.
-    - channel: int, the index of the channel.
-    - fps: int, the sampling rate of the data.
-    
-    Returns:
-    - trials: list of 1D NumPy arrays, the trials.
-    '''
-    
-    trial_starts = session_data['trials_info']['TS_TrialStart']
-    trial_end = session_data['trials_info']['TS_HandBack']
-    trials = {f"trial_{i}":session_data['neural_data'][channel][int(trial_starts[i]) * fps:int(trial_end[i]) * fps] for i in range(len(trial_starts))}
-    return trials
+def noise_filter(signal, fs, nb_harmonics=2):
+    # removing 50Hz noise and its harmonics
+    powergrid_noise_frequencies_Hz = [harmonic_idx*50 for harmonic_idx in range(1,nb_harmonics+1)] 
 
-def separate_trials(session_data, fps=2048) :
-    '''
-    Separate trials from the session data for all channels.
-    
-    Parameters:
-    - session_data: dict, the data of a session.
-    - fps: int, the sampling rate of the data.
-    
-    Returns:
-    - session_data: dict, the input dictionnary with an new trial key that stores the timepoints for each trial.
-    '''
-    trial_dict = {f'channel_{channel}': get_trials(session_data, channel, fps = fps) for channel in range(len(session_data['channel_labels']))}
-    session_data['trials'] = trial_dict
-    return session_data
+    for noise_frequency in powergrid_noise_frequencies_Hz:
+        sos = butter(N=4, Wn=(noise_frequency - 2, noise_frequency + 2), fs=fs, btype="bandstop", output="sos")
+        signal = sosfiltfilt(sos, signal)
+        
+    return signal
 
-def remove_trials_with_error(session_data):
-    '''
-    Remove the trials with an error from the session data.
-    
-    Parameters:
-    - session_data: dict, the data of a session.
-    
-    Returns:
-    - session_data: dict, the input dictionnary with the erroneous trials removed
-    '''
-    
-    erroneous_trials = [i for i in range(len(session_data['trials_info']['ErrorType'])) if session_data['trials_info']['ErrorType'][i] != 'NoError']
 
-    for trial_id in erroneous_trials:
-        for channel_idx in range(len(session_data['channel_labels'])):
-            session_data['trials'][f'channel_{channel_idx}'].pop(f'trial_{trial_id}')
-                
-    return session_data
+if __name__ == '__main__':
+    p = Participant('s6')
+    # df = p.get_features_all_sessions_ExObs()
+    df = p.get_features_all_sessions_mvt(data='E')
+    
 
-def substract_mean_baseline(session_data, fps, baseline_duration = 1.0, how='each_trial'):
-    '''
-    Normalize the entire signal with the average of the baseline periods over all trials.
-    
-    Parameters:
-    - session_data: dict, the session data.
-    - fps: int, the sampling rate of the data.
-    - baseline_duration: int, the duration of the baseline period in seconds.
-    - how: string, the normalization method to use. Either 'each_trial' or 'all_trials'.
-    
-    Returns:
-    - session_data: dict, the input dictionary with the trials normalized.
-    '''
-    if how == 'each_trial':
-        for channel in session_data['trials'].keys():
-            for trial in session_data['trials'][channel].keys():
-                mean = session_data['trials'][channel][trial][0:int(fps*baseline_duration)].mean()
-                session_data['trials'][channel][trial] = session_data['trials'][channel][trial] - mean
-                
-    elif how == 'all_trials':
-        means = []
-        for channel in session_data['trials'].keys():
-            for trial in session_data['trials'][channel].keys():
-                means.append(session_data['trials'][channel][trial][0:int(fps*baseline_duration)].mean())
-        total_mean = np.mean(means)
-        for channel in session_data['trials'].keys():
-            for trial in session_data['trials'][channel].keys():
-                session_data['trials'][channel][trial] = session_data['trials'][channel][trial] - total_mean
-    
-    return session_data    
+
