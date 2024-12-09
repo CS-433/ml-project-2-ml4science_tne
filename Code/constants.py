@@ -36,3 +36,5 @@ WINDOW_SIZE = 1000
 STEP_SIZE = 100
 # Participants
 PARTICIPANTS = ['s6', 's7', 's11', 's12']
+# Reproducibility purposes
+RANDOM_STATE = 42

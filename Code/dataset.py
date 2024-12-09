@@ -47,21 +47,22 @@ class Participant:
             for session in self.sessions
         ])
         
-    def get_features_per_session_mvt(self, session, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        if not (data=='E' or data=='O'): raise ValueError('Invalid data')
+    def get_features_per_session_mvt(self, session, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
         trial_dict = {}
         trial_dict['label'] = []
         for trial in tqdm(session.trials):
-            if trial.action_type != data: continue
+            if trial.action_type != movtype: continue
             trial_dict['label'].append(trial.object_size)
             trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size) 
                                        
         return pd.DataFrame(trial_dict)
     
-    def get_features_all_sessions_mvt(self, data, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        if not (data!='E' or data!='O'): raise ValueError('Invalid data')
+    def get_features_all_sessions_mvt(self, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
+        print(f'Loading features for {len(self.sessions)} sessions...')
         return pd.concat([
-            self.get_features_per_session_mvt(session, data, freq_band, features, window_size, step_size)
+            self.get_features_per_session_mvt(session, movtype, freq_band, features, window_size, step_size)
             for session in self.sessions
         ])
     
@@ -81,7 +82,6 @@ class Participant:
         return trial_dict
     
     def plot_channel_responsiveness(self, dB=True):
-        
         num_cols = 4
         fig_width = 20
         num_rows = int(np.ceil(self.nb_channels / num_cols))
