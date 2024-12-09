@@ -294,11 +294,6 @@ def noise_filter(signal, fs, nb_harmonics=2):
         
     return signal
 
-# def get_features_across_participants_ExObs(participants=PARTICIPANTS):
-#     for participant in participants:
-#         participant = Participant(participant)
-#         df = participant.get_features_all_sessions_ExObs()
-        
 
 if __name__ == '__main__':
     p = Participant('s6')
