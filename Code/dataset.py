@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
@@ -30,14 +31,20 @@ class Participant:
             Channel(self.channels_labels[i], i, self.channels_locations[i], self.name, self.sessions)
             for i in range(self.nb_channels)
         ]
-        self.relevant_channels = [channel for channel in self.channels if channel.p_value_Ex < alpha and channel.p_value_Obs < alpha]
+        self.relevant_channels_obs = [channel for channel in self.channels if channel.p_value_Obs < alpha]
+        self.relevant_channels_ex = [channel for channel in self.channels if channel.p_value_Ex < alpha]
+        self.relevant_channels_both = [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex]
+
+    @staticmethod
+    def load_from_pickle(data_path):
+        return pickle.load(open(data_path, 'rb'))
 
     def get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         trial_dict = {}
         trial_dict['label'] = []
         for trial in tqdm(session.trials):
             trial_dict['label'].append(trial.action_type)
-            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, self.relevant_channels_both, freq_band, features, window_size, step_size)
                                        
         return pd.DataFrame(trial_dict)
 
@@ -49,12 +56,13 @@ class Participant:
         
     def get_features_per_session_mvt(self, session, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
+        relevant_channels = self.relevant_channels_ex if movtype == 'E' else self.relevant_channels_obs
         trial_dict = {}
         trial_dict['label'] = []
         for trial in tqdm(session.trials):
             if trial.action_type != movtype: continue
             trial_dict['label'].append(trial.object_size)
-            trial_dict = self.get_features(trial_dict, trial, freq_band, features, window_size, step_size) 
+            trial_dict = self.get_features(trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size) 
                                        
         return pd.DataFrame(trial_dict)
     
@@ -65,8 +73,26 @@ class Participant:
             for session in self.sessions
         ])
     
-    def get_features(self, trial_dict, trial, freq_band, features, window_size, step_size):
-        for channel in tqdm(self.relevant_channels):
+    def get_features_per_session_rnd(self, session, nb_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        channels = random.sample(self.channels, nb_channels)
+        trial_dict = {}
+        trial_dict['label'] = []
+        for trial in tqdm(session.trials):
+            if movtype != None and trial.action_type != movtype: continue
+            trial_dict['label'].append(trial.object_size)
+            trial_dict = self.get_features(trial_dict, trial, channels, freq_band, features, window_size, step_size)
+
+        return pd.DataFrame(trial_dict)
+    
+    def get_features_all_sessions_rnd(self, nb_channels, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        assert movtype is None or movtype == 'E' or movtype == 'O', 'If present (not None), the type of movement should be either E (for Ex) or O (for Obs)'
+        return pd.concat([
+            self.get_features_per_session_rnd(session, nb_channels, movtype, freq_band, features, window_size, step_size)
+            for session in self.sessions
+        ])
+    
+    def get_features(self, trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size):
+        for channel in relevant_channels:
             for band_name, (low, high) in freq_band.items():
                 signal = trial.get_preprocessed_signal(channel, low, high)
                 for feature in features:
@@ -81,7 +107,6 @@ class Participant:
         return trial_dict
     
     def plot_channel_responsiveness(self, dB=True):
-        
         num_cols = 4
         fig_width = 20
         num_rows = int(np.ceil(self.nb_channels / num_cols))
@@ -121,7 +146,6 @@ class Participant:
         plt.show()
         
     def plot_preprocessed_signal(self, trial=None):
-        
         num_cols = len(FREQ_BANDS)
         fig_width = 20
         num_rows = int(len(self.relevant_channels))
@@ -218,6 +242,9 @@ class Trials:
     def get_mean_baseline(self):
         return np.mean(self.baseline_signal, axis=1)
     
+    def get_std_baseline(self):
+        return np.std(self.baseline_signal, axis=1)
+    
     def get_subsampled_baseline(self, subsampling_frequency=SUBSAMPLING_FREQUENCY):
         return subsample(self.baseline_signal, self.fs, subsampling_frequency)
     
@@ -235,7 +262,9 @@ class Trials:
         if subsampling_frequency:
             signal = subsample(signal, self.fs, subsampling_frequency)
         if baseline_correction:
-            signal = signal - np.outer(self.get_mean_baseline(), np.ones(np.shape(signal)[1]))
+            mean_baseline = self.get_mean_baseline()[:, np.newaxis]
+            std_baseline = self.get_std_baseline()[:, np.newaxis]
+            signal = (signal - mean_baseline) / std_baseline
         if nb_samples:
             signal = resample(signal, NB_SAMPLES, axis=1)
 
@@ -298,7 +327,7 @@ def noise_filter(signal, fs, nb_harmonics=2):
 if __name__ == '__main__':
     p = Participant('s6')
     # df = p.get_features_all_sessions_ExObs()
-    df = p.get_features_all_sessions_mvt(data='E')
+    df = p.get_features_all_sessions_mvt(movtype='E')
     
 
 
