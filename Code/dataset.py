@@ -3,9 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 from tqdm import tqdm
-from scipy.signal import resample
-from scipy.signal import hilbert
-from scipy.signal import welch, correlate
+from scipy.signal import resample, hilbert, welch, correlate, iirnotch, filtfilt
 from scipy.stats import ttest_rel
 
 from utils import *
@@ -211,12 +209,12 @@ class Session:
         self.no_error = np.array(trials_info['ErrorCode']) == 0
         self.nb_trials = len(trials_info['TS_TrialStart'])
         self.trials = [
-            Trials(i, self.fs,  self.neural_data, trials_info)
+            Trial(i, self.fs,  self.neural_data, trials_info)
             for i in range(self.nb_trials)
             if self.no_error[i]
         ]
         
-class Trials: 
+class Trial: 
     def __init__(self, trial_idx, fs, neural_data, trials_info):
         trial_baseline_start = trials_info['TS_TrialStart'][trial_idx]
         trial_baseline_stop = trials_info['TS_CueOn'][trial_idx]
@@ -248,9 +246,8 @@ class Trials:
     def get_subsampled_baseline(self, subsampling_frequency=SUBSAMPLING_FREQUENCY):
         return subsample(self.baseline_signal, self.fs, subsampling_frequency)
     
-    def get_signal(
-            self, trigger_start='TS_HandOut', trigger_stop='TS_HandBack',
-            subsampling_frequency=SUBSAMPLING_FREQUENCY, baseline_correction=True, nb_samples=NB_SAMPLES):
+    def get_signal(self, trigger_start='TS_HandOut', trigger_stop='TS_HandBack',
+                   subsampling_frequency=SUBSAMPLING_FREQUENCY, baseline_correction=True, nb_samples=NB_SAMPLES):
         
         if trigger_start not in self.trials_info.keys() or trigger_stop not in self.trials_info.keys():
             raise ValueError('Invalid trigger')
@@ -315,11 +312,11 @@ def bandpass_filter(signal, lowcut, highcut, fs, order=4):
 
 def noise_filter(signal, fs, nb_harmonics=2):
     # removing 50Hz noise and its harmonics
-    powergrid_noise_frequencies_Hz = [harmonic_idx*50 for harmonic_idx in range(1,nb_harmonics+1)] 
+    powergrid_noise_frequencies_Hz = [harmonic_idx*50 for harmonic_idx in range(1, nb_harmonics+1)] 
 
     for noise_frequency in powergrid_noise_frequencies_Hz:
-        sos = butter(N=4, Wn=(noise_frequency - 2, noise_frequency + 2), fs=fs, btype="bandstop", output="sos")
-        signal = sosfiltfilt(sos, signal)
+        b_notch, a_notch = iirnotch(noise_frequency, 30, fs)
+        signal = filtfilt(b_notch, a_notch, signal)
         
     return signal
 
