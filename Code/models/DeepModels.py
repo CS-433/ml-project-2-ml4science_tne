@@ -2,6 +2,25 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+class MLP(nn.Module):
+    def __init__(self, input_size, n_classes, layers=(64, 32, 16)):
+        super().__init__()
+
+        # Dynamically creates sequential layers
+        self.model = nn.Sequential(*[
+            nn.Linear(input_size, layers[0]),
+            nn.ReLU(inplace=True),
+            *[m for l1, l2 in zip(layers, layers[1:]) for m in [
+                nn.Linear(l1, l2),
+                nn.ReLU(inplace=True)
+            ]],
+            nn.Linear(layers[-1], n_classes)
+        ])
+
+
+    def forward(self, x):
+        return self.model(x)
+
 class CNN(nn.Module):
     def __init__(self, input_channels, n_classes, length, channels=(8, 8, 16),
                  layers=(64, 32), paddings=(1, 1, 1), convkernels=(3, 3, 3),

@@ -4,15 +4,15 @@ from tqdm import tqdm
 import numpy as np
 
 class Trainer():
-    def __init__(self, model, lr, epochs, batch_size, weight_decay=1e-2, save_path='model.pth', device='cpu'):
+    def __init__(self, model, lr, epochs, weight_decay=1e-2, save_path='model.pth', device='cpu'):
         self.model = model.to(device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
 
         self.lr = lr
         self.epochs = epochs
-        self.batch_size = batch_size
         self.save_path = save_path
+        self.device = device
 
     def train(self, train_loader, val_loader):
         valid_loss_min = np.Inf
@@ -39,6 +39,8 @@ class Trainer():
             train_loss /= len(train_loader.dataset)
             train_acc /= len(train_loader.dataset)
 
+            print(f'Epoch: {epoch+1} \tTraining Loss: {train_loss:.6f} \tTraining Acc: {train_acc:.6f}')
+
             self.model.eval()
             with torch.no_grad():
                 for input, target in tqdm(val_loader, desc=f'Epoch {epoch+1}/{self.epochs} - Validation'):
@@ -52,10 +54,24 @@ class Trainer():
             valid_loss /= len(val_loader.dataset)
             valid_acc /= len(val_loader.dataset)
                 
-            print(f'Epoch {epoch+1}/{self.epochs}, Train Loss: {loss.item()}, Train Accuracy: {train_acc:.4f},\
-                Valid Loss: {valid_loss.item()}, Valid Accuracy: {valid_acc:.4f}')
+            print(f'Epoch: {epoch+1} \tValidation Loss: {valid_loss:.6f} \tValidation Acc: {valid_acc:.6f}')
             
             if valid_loss <= valid_loss_min:
-                print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_loss_min, valid_loss))
+                print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(valid_loss_min, valid_loss))
                 torch.save(self.model.state_dict(), self.save_path)
                 valid_loss_min = valid_loss
+
+class DfDataset(torch.utils.data.Dataset):
+    def __init__(self, features, labels):
+        self.features = torch.from_numpy(features).float()
+        self.labels = labels.to_numpy()
+        classes = sorted(list(set(self.labels)))
+        self.class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
+
+    def __len__(self):
+        return len(self.labels)
+    
+    def __getitem__(self, idx):
+        features = self.features[idx]
+        label = self.class_to_idx[self.labels[idx]]
+        return features, label
