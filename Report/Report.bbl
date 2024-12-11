@@ -21,9 +21,21 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
-\bibitem{Glaser.etal2020a}
-J.~I. Glaser, A.~S. Benjamin, R.~H. Chowdhury, M.~G. Perich, L.~E. Miller, and
-  K.~P. Kording, ``Machine {{Learning}} for {{Neural Decoding}},''
-  \emph{eneuro}, vol.~7, no.~4, pp. ENEURO.0506--19.2020, Jul. 2020.
+\bibitem{EmotionClassificationSVM}
+A.~Jalilifard, E.~B. Pizzolato, and M.~K. Islam, ``Emotion classification using
+  single-channel scalp-eeg recording,'' in \emph{2016 38th Annual International
+  Conference of the IEEE Engineering in Medicine and Biology Society (EMBC)},
+  2016, pp. 845--849.
+
+\bibitem{EEGRandomForset}
+S.~Bose, V.~Rama, N.~Warangal, and C.~Rama~Rao, ``Eeg signal analysis for
+  seizure detection using discrete wavelet transform and random forest,'' in
+  \emph{2017 International Conference on Computer and Applications (ICCA)},
+  2017, pp. 369--378.
+
+\bibitem{EEGMLReview}
+M.-P. Hosseini, A.~Hosseini, and K.~Ahi, ``A review on machine learning for eeg
+  signal processing in bioengineering,'' \emph{IEEE Reviews in Biomedical
+  Engineering}, vol.~14, pp. 204--218, 2021.
 
 \end{thebibliography}
