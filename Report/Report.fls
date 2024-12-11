@@ -582,6 +582,8 @@ INPUT Report.aux
 INPUT .\Report.out
 INPUT .\Report.out
 INPUT I:\MiKTeX\fonts\enc\dvips\base\8r.enc
+INPUT I:\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
+INPUT I:\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT I:\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
 INPUT I:\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy7.pfb
 INPUT I:\MiKTeX\fonts\type1\urw\times\utmb8a.pfb

@@ -29,65 +29,91 @@ class Participant:
             Channel(self.channels_labels[i], i, self.channels_locations[i], self.name, self.sessions)
             for i in range(self.nb_channels)
         ]
-        self.relevant_channels_obs = [channel for channel in self.channels if channel.p_value_Obs < alpha]
-        self.relevant_channels_ex = [channel for channel in self.channels if channel.p_value_Ex < alpha]
-        self.relevant_channels_both = [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex]
+        self.relevant_channels_obs = sorted(
+            [channel for channel in self.channels if channel.p_value_Obs < alpha],
+            key=lambda channel: channel.p_value_Obs
+        )
+        self.relevant_channels_ex = sorted(
+            [channel for channel in self.channels if channel.p_value_Ex < alpha],
+            key=lambda channel: channel.p_value_Ex
+        )
+        self.relevant_channels_both = sorted(
+            [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex],
+            key=lambda channel: channel.p_value_Obs + channel.p_value_Ex
+        )
 
     @staticmethod
     def load_from_pickle(data_path):
         return pickle.load(open(data_path, 'rb'))
 
-    def get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def _get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         trial_dict = {}
-        trial_dict['label'] = []
+        labels = []
         for trial in tqdm(session.trials):
-            trial_dict['label'].append(trial.action_type)
+            labels.append(trial.action_type)
             trial_dict = self.get_features(trial_dict, trial, self.relevant_channels_both, freq_band, features, window_size, step_size)
                                        
-        return pd.DataFrame(trial_dict)
+        return labels, pd.DataFrame(trial_dict)
 
     def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        return pd.concat([
-            self.get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
-            for session in self.sessions
-        ])
+        all_labels = []
+        all_features = []
+        for session in self.sessions:
+            labels, features = self._get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            all_labels.extend(labels)
+            all_features.append(features)
+        all_features = pd.concat(all_features)
+        all_features['label'] = all_labels
+        return all_features
         
-    def get_features_per_session_mvt(self, session, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
+    def _get_features_per_session_mvt(self, session, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         relevant_channels = self.relevant_channels_ex if movtype == 'E' else self.relevant_channels_obs
+        if channels != 'all':
+            relevant_channels = [channel for i, channel in enumerate(relevant_channels) if i in channels]
         trial_dict = {}
-        trial_dict['label'] = []
+        labels = []
         for trial in tqdm(session.trials):
             if trial.action_type != movtype: continue
-            trial_dict['label'].append(trial.object_size)
+            labels.append(trial.object_size)
             trial_dict = self.get_features(trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size) 
                                        
-        return pd.DataFrame(trial_dict)
+        return labels, pd.DataFrame(trial_dict)
     
-    def get_features_all_sessions_mvt(self, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_mvt(self, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
-        return pd.concat([
-            self.get_features_per_session_mvt(session, movtype, freq_band, features, window_size, step_size)
-            for session in self.sessions
-        ])
+        assert channels == 'all' or type(channels) == list, 'The channels parameter should be either "all" or a list of channel indices'
+        all_labels = []
+        all_features = []
+        for session in self.sessions:
+            labels, features = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
+            all_labels.extend(labels)
+            all_features.append(features)
+        all_features = pd.concat(all_features)
+        all_features['label'] = all_labels
+        return all_features
     
-    def get_features_per_session_rnd(self, session, nb_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def _get_features_per_session_rnd(self, session, nb_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         channels = random.sample(self.channels, nb_channels)
         trial_dict = {}
-        trial_dict['label'] = []
+        labels = []
         for trial in tqdm(session.trials):
             if movtype != None and trial.action_type != movtype: continue
-            trial_dict['label'].append(trial.object_size)
+            labels.append(trial.object_size)
             trial_dict = self.get_features(trial_dict, trial, channels, freq_band, features, window_size, step_size)
 
-        return pd.DataFrame(trial_dict)
+        return labels, pd.DataFrame(trial_dict)
     
     def get_features_all_sessions_rnd(self, nb_channels, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         assert movtype is None or movtype == 'E' or movtype == 'O', 'If present (not None), the type of movement should be either E (for Ex) or O (for Obs)'
-        return pd.concat([
-            self.get_features_per_session_rnd(session, nb_channels, movtype, freq_band, features, window_size, step_size)
-            for session in self.sessions
-        ])
+        all_labels = []
+        all_features = []
+        for session in self.sessions:
+            labels, features = self._get_features_per_session_rnd(session, nb_channels, movtype, freq_band, features, window_size, step_size)
+            all_labels.extend(labels)
+            all_features.append(features)
+        all_features = pd.concat(all_features)
+        all_features['label'] = all_labels
+        return all_features
     
     def get_features(self, trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size):
         for channel in relevant_channels:
