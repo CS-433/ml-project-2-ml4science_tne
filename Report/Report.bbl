@@ -38,4 +38,42 @@ M.-P. Hosseini, A.~Hosseini, and K.~Ahi, ``A review on machine learning for eeg
   signal processing in bioengineering,'' \emph{IEEE Reviews in Biomedical
   Engineering}, vol.~14, pp. 204--218, 2021.
 
+\bibitem{welch}
+\BIBentryALTinterwordspacing
+O.~M. Solomon, Jr, ``Psd computations using welch's method. [power spectral
+  density (psd)],'' 12 1991. [Online]. Available:
+  \url{https://www.osti.gov/biblio/5688766}
+\BIBentrySTDinterwordspacing
+
+\bibitem{SUBASI200587}
+\BIBentryALTinterwordspacing
+A.~Subasi and E.~Erçelebi, ``Classification of eeg signals using neural
+  network and logistic regression,'' \emph{Computer Methods and Programs in
+  Biomedicine}, vol.~78, no.~2, pp. 87--99, 2005. [Online]. Available:
+  \url{https://www.sciencedirect.com/science/article/pii/S0169260705000246}
+\BIBentrySTDinterwordspacing
+
+\bibitem{NIPS2006_35937e34}
+\BIBentryALTinterwordspacing
+R.~Tomioka, K.~Aihara, and K.-R. M\"{u}ller, ``Logistic regression for single
+  trial eeg classification,'' in \emph{Advances in Neural Information
+  Processing Systems}, B.~Sch\"{o}lkopf, J.~Platt, and T.~Hoffman, Eds.,
+  vol.~19.\hskip 1em plus 0.5em minus 0.4em\relax MIT Press, 2006. [Online].
+  Available:
+  \url{https://proceedings.neurips.cc/paper_files/paper/2006/file/35937e34256cf4e5b2f7da08871d2a0b-Paper.pdf}
+\BIBentrySTDinterwordspacing
+
+\bibitem{knn_svm_review}
+M.~N. A.~H. Sha'abani, N.~Fuad, N.~Jamal, and M.~F. Ismail, ``knn and svm
+  classification for eeg: A review,'' in \emph{InECCE2019}, A.~N.
+  Kasruddin~Nasir, M.~A. Ahmad, M.~S. Najib, Y.~Abdul~Wahab, N.~A. Othman,
+  N.~M. Abd~Ghani, A.~Irawan, S.~Khatun, R.~M.~T. Raja~Ismail, M.~M. Saari,
+  M.~R. Daud, and A.~A. Mohd~Faudzi, Eds.\hskip 1em plus 0.5em minus
+  0.4em\relax Singapore: Springer Singapore, 2020, pp. 555--565.
+
+\bibitem{1dkernel}
+A.~Baldominos, Y.~Sáez, and P.~Isasi, ``Evolutionary design of convolutional
+  neural networks for human activity recognition in sensor-rich environments,''
+  \emph{Sensors}, vol.~18, 04 2018.
+
 \end{thebibliography}
