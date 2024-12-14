@@ -92,23 +92,24 @@ class Participant:
         all_features['label'] = all_labels
         return all_features
     
-    def _get_features_per_session_rnd(self, session, nb_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        channels = random.sample(self.channels, nb_channels)
+    def _get_features_per_session_unresponsive(self, session, random_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
         trial_dict = {}
         labels = []
-        for trial in tqdm(session.trials):
+        for trial in session.trials: # tqdm(session.trials):
             if movtype != None and trial.action_type != movtype: continue
             labels.append(trial.object_size)
-            trial_dict = self.get_features(trial_dict, trial, channels, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, random_channels, freq_band, features, window_size, step_size)
 
         return labels, pd.DataFrame(trial_dict)
     
-    def get_features_all_sessions_rnd(self, nb_channels, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_unresponsive(self, nb_channels, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE, alpha=ALPHA):
         assert movtype is None or movtype == 'E' or movtype == 'O', 'If present (not None), the type of movement should be either E (for Ex) or O (for Obs)'
         all_labels = []
         all_features = []
+        unresponsive_channels = [channel for channel in self.channels if channel.p_value_Ex > alpha]
+        print('random_channels', unresponsive_channels, len(unresponsive_channels))
         for session in self.sessions:
-            labels, features = self._get_features_per_session_rnd(session, nb_channels, movtype, freq_band, features, window_size, step_size)
+            labels, features = self._get_features_per_session_unresponsive(session, unresponsive_channels, movtype, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
             all_features.append(features)
         all_features = pd.concat(all_features)
