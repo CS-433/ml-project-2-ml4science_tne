@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 from tqdm import tqdm
-from scipy.signal import resample, hilbert, welch, correlate, iirnotch, filtfilt
+from scipy.signal import resample, butter, sosfiltfilt, hilbert, welch, correlate, iirnotch, filtfilt
 from scipy.stats import ttest_rel
 
 from utils import *
