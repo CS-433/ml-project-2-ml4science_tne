@@ -5,7 +5,7 @@ from constants import *
 random.seed(RANDOM_STATE)
 
 def load_participant(part_name):
-    participant = Participant(part_name, data_path=DATA_PATH, alpha=ALPHA)
+    participant = Participant(part_name)
     saved_dir = os.path.join(os.getcwd(), 'saved')
     if not os.path.exists(saved_dir):
         os.makedirs(saved_dir)

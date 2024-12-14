@@ -4,10 +4,10 @@ from tqdm import tqdm
 import numpy as np
 
 class Trainer():
-    def __init__(self, model, lr, epochs, weight_decay=1e-2, save_path='model.pth', device='cpu'):
+    def __init__(self, model, lr, epochs, weight_decay=1e-3, save_path='model.pth', device='cpu'):
         self.model = model.to(device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=weight_decay)
 
         self.lr = lr
         self.epochs = epochs
