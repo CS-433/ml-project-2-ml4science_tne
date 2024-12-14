@@ -41,6 +41,18 @@ class Participant:
             [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex],
             key=lambda channel: channel.p_value_Obs + channel.p_value_Ex
         )
+        self.relevant_channels_small = sorted(
+            [channel for channel in self.channels if channel.p_value_small < alpha],
+            key=lambda channel: channel.p_value_small
+        )
+        self.relevant_channels_big = sorted(
+            [channel for channel in self.channels if channel.p_value_big < alpha],
+            key=lambda channel: channel.p_value_big
+        )
+        self.relevant_channels_bigsmall = sorted(
+            [channel for channel in self.relevant_channels_small if channel in self.relevant_channels_big],
+            key=lambda channel: channel.p_value_small + channel.p_value_big
+        )
 
     @staticmethod
     def load_from_pickle(data_path):
@@ -86,6 +98,32 @@ class Participant:
         all_features = []
         for session in self.sessions:
             labels, features = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
+            all_labels.extend(labels)
+            all_features.append(features)
+        all_features = pd.concat(all_features)
+        all_features['label'] = all_labels
+        return all_features
+    
+    def _new_get_features_per_session_mvt(self, session, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        relevant_channels = self.relevant_channels_bigsmall
+        if channels != 'all':
+            relevant_channels = [channel for i, channel in enumerate(relevant_channels) if i in channels]
+        trial_dict = {}
+        labels = []
+        for trial in tqdm(session.trials):
+            if trial.action_type != movtype: continue
+            labels.append(trial.object_size)
+            trial_dict = self.get_features(trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size) 
+                                       
+        return labels, pd.DataFrame(trial_dict)
+    
+    def new_get_features_all_sessions_mvt(self, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
+        assert channels == 'all' or type(channels) == list, 'The channels parameter should be either "all" or a list of channel indices'
+        all_labels = []
+        all_features = []
+        for session in self.sessions:
+            labels, features = self._new_get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
             all_features.append(features)
         all_features = pd.concat(all_features)
@@ -202,6 +240,12 @@ class Channel:
         pds_baseline_Obs = []
         pds_aroundObjGrasped_Obs = []
         
+        pds_baseline_small = []
+        pds_aroundObjGrasped_small = []
+        
+        pds_baseline_big = []
+        pds_aroundObjGrasped_big = []
+        
         for session in sessions:
             for trial in session.trials:
                 if trial.action_type == 'E':
@@ -210,11 +254,21 @@ class Channel:
                 if trial.action_type == 'O':
                     pds_baseline_Obs.append(trial.get_pds_baseline(idx))
                     pds_aroundObjGrasped_Obs.append(trial.get_pds_aroundObjGrasped(idx))
+                if trial.object_size == 'S':
+                    pds_baseline_small.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_small.append(trial.get_pds_aroundObjGrasped(idx))
+                if trial.object_size == 'B':
+                    pds_baseline_big.append(trial.get_pds_baseline(idx))
+                    pds_aroundObjGrasped_big.append(trial.get_pds_aroundObjGrasped(idx))
                 
         self.pds_baseline_Ex = np.mean(np.array(pds_baseline_Ex), axis=0)
         self.pds_aroundObjGrasped_Ex = np.mean(np.array(pds_aroundObjGrasped_Ex), axis=0)
         self.pds_baseline_Obs = np.mean(np.array(pds_baseline_Obs), axis=0)
         self.pds_aroundObjGrasped_Obs = np.mean(np.array(pds_aroundObjGrasped_Obs), axis=0)
+        self.pds_baseline_small = np.mean(np.array(pds_baseline_small), axis=0)
+        self.pds_aroundObjGrasped_small = np.mean(np.array(pds_aroundObjGrasped_small), axis=0)
+        self.pds_baseline_big = np.mean(np.array(pds_baseline_big), axis=0)
+        self.pds_aroundObjGrasped_big = np.mean(np.array(pds_aroundObjGrasped_big), axis=0)
         
         self.absolute_psd_difference_Ex = np.abs(self.pds_aroundObjGrasped_Ex - self.pds_baseline_Ex)
         self.corr_Ex = correlate(self.pds_baseline_Ex, self.pds_aroundObjGrasped_Ex)
@@ -223,6 +277,14 @@ class Channel:
         self.absolute_psd_difference_Obs = np.abs(self.pds_aroundObjGrasped_Obs - self.pds_baseline_Obs)
         self.corr_Obs = correlate(self.pds_baseline_Obs, self.pds_aroundObjGrasped_Obs)
         self.t_stat_Obs, self.p_value_Obs = ttest_rel(self.pds_baseline_Obs[1], self.pds_aroundObjGrasped_Obs[1])
+        
+        self.absolute_psd_difference_small = np.abs(self.pds_aroundObjGrasped_small - self.pds_baseline_small)
+        self.corr_small = correlate(self.pds_baseline_small, self.pds_aroundObjGrasped_small)
+        self.t_stat_small, self.p_value_small = ttest_rel(self.pds_baseline_small[1], self.pds_aroundObjGrasped_small[1])
+        
+        self.absolute_psd_difference_big = np.abs(self.pds_aroundObjGrasped_big - self.pds_baseline_big)
+        self.corr_big = correlate(self.pds_baseline_big, self.pds_aroundObjGrasped_big)
+        self.t_stat_big, self.p_value_big = ttest_rel(self.pds_baseline_big[1], self.pds_aroundObjGrasped_big[1])
 
     
 class Session: 
