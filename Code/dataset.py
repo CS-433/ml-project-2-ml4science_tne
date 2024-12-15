@@ -59,9 +59,9 @@ class Participant:
         all_labels = []
         all_features = []
         for session in self.sessions:
-            labels, features = self._get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
@@ -85,9 +85,9 @@ class Participant:
         all_labels = []
         all_features = []
         for session in self.sessions:
-            labels, features = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
@@ -108,9 +108,9 @@ class Participant:
         all_features = []
         unresponsive_channels = [channel for channel in self.channels if channel.p_value_Ex > alpha]
         for session in self.sessions:
-            labels, features = self._get_features_per_session_unresponsive(session, unresponsive_channels, movtype, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_unresponsive(session, unresponsive_channels, movtype, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
@@ -348,7 +348,7 @@ def noise_filter(signal, fs, nb_harmonics=2):
 
 
 if __name__ == '__main__':
-    p = Participant('s6')
+    p = Participant('s12')
     # df = p.get_features_all_sessions_ExObs()
     df = p.get_features_all_sessions_mvt(movtype='E')
     

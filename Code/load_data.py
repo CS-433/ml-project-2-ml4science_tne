@@ -9,8 +9,8 @@ def load_participant(part_name):
     saved_dir = os.path.join(os.getcwd(), 'saved')
     if not os.path.exists(saved_dir):
         os.makedirs(saved_dir)
-        with open(f'saved/{part_name}.pkl', 'wb') as f:
-            pickle.dump(participant, f, pickle.HIGHEST_PROTOCOL)    
+    with open(f'saved/{part_name}.pkl', 'wb') as f:
+        pickle.dump(participant, f, pickle.HIGHEST_PROTOCOL)    
     return participant
             
 def load_features_mvt(participant):
@@ -30,7 +30,7 @@ def load_features_ExObs(participant):
     features = participant.get_features_all_sessions_ExObs()
     features.to_hdf(f'saved/features_{part_name}_ExObs.h5', 'df', mode='w', data_columns=True)
     
-    baseline_features = participant.get_features_all_sessions_unresponsive(len(participant.relevant_channels_exobs), movtype='ExObs')
+    baseline_features = participant.get_features_all_sessions_unresponsive(len(participant.relevant_channels_both), movtype=None)
     baseline_features.to_hdf(f'saved/baseline_features_{part_name}_ExObs.h5', 'df', mode='w', data_columns=True)
     
     
