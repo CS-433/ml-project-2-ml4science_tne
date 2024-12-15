@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex Report"] 1734261327 "Report.aux" "Report.bbl" "Report" 1734268156 0
+["bibtex Report"] 1734273600 "Report.aux" "Report.bbl" "Report" 1734273602 0
   "./IEEEtran.bst" 1731762092 61931 016987d9be15acf51cdd7252d40ecec2 ""
-  "./ref.bib" 1734259713 7770 232c2a4e3296d5f3cc3fa2ebe28a8a6b ""
-  "Report.aux" 1734268155 5546 eeb87eb4f6b25bf72f3b19956b50fb5c "pdflatex"
+  "./ref.bib" 1734273318 8546 53e1d42bf411fbfa4aeeeba1d8310178 ""
+  "Report.aux" 1734273601 6712 001cebafa43c376e417ecd283a140292 "pdflatex"
   (generated)
   "Report.bbl"
   "Report.blg"
   (rewritten before read)
-["pdflatex"] 1734268154 "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734268156 0
+["pdflatex"] 1734273600 "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734273602 0
   "C:/Users/Admin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1730647155 204176 086614611dacd21a235bef257195fd38 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1677404031 23159383 c95e59553718851e613b2905966e647e ""
   "I:/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -92,14 +92,17 @@
   "I:/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657797096 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "I:/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "IEEEtran.cls" 1731762092 206573 001edea5a345402fab5a141a4aef7a27 ""
-  "Report.aux" 1734268155 5546 eeb87eb4f6b25bf72f3b19956b50fb5c "pdflatex"
-  "Report.bbl" 1734261327 3755 86d453aa00c7af7a93838edad80a6bb7 "bibtex Report"
-  "Report.out" 1734268155 3053 543e1c0485aee7923fb1be32989709c9 "pdflatex"
-  "Report.tex" 1734268153 16326 f1ada98b74bb98a17ac9e398bc550624 ""
-  "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734268153 16326 f1ada98b74bb98a17ac9e398bc550624 ""
+  "Report.aux" 1734273601 6712 001cebafa43c376e417ecd283a140292 "pdflatex"
+  "Report.bbl" 1734273600 4106 cd0578208689e71fdac3e4fbad79685a "bibtex Report"
+  "Report.out" 1734273601 3332 fd246aa16a39d8faa377a09bdc0a9595 "pdflatex"
+  "Report.tex" 1734273592 19056 87a987e0b1398d8fefd3c1b065a3d7ec ""
+  "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734273592 19056 87a987e0b1398d8fefd3c1b065a3d7ec ""
   "images/1d_kernel.png" 1734253406 23911 3edbd5ff44864d83a63899a26e6f6954 ""
   "images/2024-12-11-13-41-23.png" 1733920884 67043 be219e7e3b5f0d108b84c2572b263b7f ""
   "images/2024-12-11-13-41-48.png" 1733920908 50888 5c8e88c42e5dd0f4c957bef4edb172e6 ""
+  "images/2024-12-15-14-35-58.png" 1734270821 52946 66da1f39628edd510f78d7f79bd57121 ""
+  "images/2024-12-15-14-43-56.png" 1734270821 49408 cd447d510edc28b2f9120f9f532c5886 ""
+  "images/2024-12-15-14-54-12.png" 1734270855 49773 bd32688449b5ec2937ec423ecd05ffd3 ""
   (generated)
   "Report.aux"
   "Report.log"
