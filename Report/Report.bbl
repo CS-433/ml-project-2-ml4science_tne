@@ -76,4 +76,9 @@ A.~Baldominos, Y.~Sáez, and P.~Isasi, ``Evolutionary design of convolutional
   neural networks for human activity recognition in sensor-rich environments,''
   \emph{Sensors}, vol.~18, 04 2018.
 
+\bibitem{eeg_authentication}
+C.~A. Fidas and D.~Lyras, ``A review of eeg-based user authentication: Trends
+  and future research directions,'' \emph{IEEE Access}, vol.~11, pp.
+  22\,917--22\,934, 2023.
+
 \end{thebibliography}
