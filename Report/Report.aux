@@ -13,73 +13,90 @@
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{eegforbci}
+\citation{VIEIRA201758}
 \citation{EmotionClassificationSVM}
 \citation{EEGRandomForset}
 \citation{EEGMLReview}
-\citation{welch}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {II}Data acquisition and problem specification}{1}{section.2}\protected@file@percent }
 \newlabel{sec:problem}{{II}{1}{Data acquisition and problem specification}{section.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Timing of the trials}}{1}{figure.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation)}}{1}{figure.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {III}Data analysis}{1}{section.3}\protected@file@percent }
 \newlabel{sec:analysis}{{III}{1}{Data analysis}{section.3}{}}
+\citation{welch}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Channel responsiveness}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Data preprocessing}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{subsec:preproc}{{\mbox  {III-B}}{2}{Data preprocessing}{subsection.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Feature extraction}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Action recognition}{2}{section.4}\protected@file@percent }
+\newlabel{sec:actionrecognition}{{IV}{2}{Action recognition}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Responsive channels}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Locations of the ten most responsive channels in participant \textit  {s6}: the number in parenthesis is the number of top-10 channels in this region. Edited from Hugh Guiney, CC BY-SA 3.0 \url  {https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}}{2}{figure.2}\protected@file@percent }
+\newlabel{fig:s6actionrecogchannels}{{2}{2}{Locations of the ten most responsive channels in participant \textit {s6}: the number in parenthesis is the number of top-10 channels in this region. Edited from Hugh Guiney, CC BY-SA 3.0 \url {https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Number of responsive channels in total and location of the ten most responsive per participant. Prec.: precentral gyrus; postc.: postcentral gyrus; sm.: supramarginal gyrus; cmf.: caudal middle frontal gyrus; thal.: thalamus; sf.: superior frontal gyrus; WMpara.: white matter paracentral gyrus}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:actionrecogchannellocations}{{I}{2}{Number of responsive channels in total and location of the ten most responsive per participant. Prec.: precentral gyrus; postc.: postcentral gyrus; sm.: supramarginal gyrus; cmf.: caudal middle frontal gyrus; thal.: thalamus; sf.: superior frontal gyrus; WMpara.: white matter paracentral gyrus}{table.1}{}}
 \citation{scikitlearn}
 \citation{pytorch}
 \citation{SUBASI200587}
 \citation{NIPS2006_35937e34}
 \citation{knn_svm_review}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Channel responsiveness}{2}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Data preprocessing}{2}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Feature extraction}{2}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Action recognition}{2}{section.4}\protected@file@percent }
-\newlabel{sec:actionrecognition}{{IV}{2}{Action recognition}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Relevant channels}{2}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Baseline data}{2}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Models}{2}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax Logistic regression}{2}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax SVM}{2}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax Random forest}{2}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax MLP}{2}{section*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Results}{2}{subsection.4.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Accuracies by model for the action recognition task: all models perform very well when trained on features extracted from relevant channels}}{3}{figure.2}\protected@file@percent }
+\citation{eegrfclassif}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Baseline data}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Models}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax Logistic regression}{3}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax SVM}{3}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax Random forest}{3}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax MLP}{3}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Results}{3}{subsection.4.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}}{3}{figure.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Discussion}{3}{subsection.4.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {V}Movement recognition}{3}{section.5}\protected@file@percent }
 \newlabel{sec:objectrecognition}{{V}{3}{Movement recognition}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Responsive channels}{3}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Models}{3}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Results}{3}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax Execution trials}{3}{section*.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Accuracies by model for the movement recognition task, executed by the subjects (execution)}}{3}{figure.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{\relax Observation trials}{3}{section*.6}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Accuracies by model for the movement recognition task, executed by the subjects (observation)}}{3}{figure.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Discussion}{3}{subsection.5.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Pure deep learning approach}{3}{section.6}\protected@file@percent }
-\newlabel{sec:deeplearning}{{VI}{3}{Pure deep learning approach}{section.6}{}}
-\citation{1dkernel}
-\bibstyle{IEEEtran}
-\bibdata{ref}
-\bibcite{EmotionClassificationSVM}{1}
-\bibcite{EEGRandomForset}{2}
-\bibcite{EEGMLReview}{3}
-\bibcite{welch}{4}
-\bibcite{scikitlearn}{5}
-\bibcite{pytorch}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Models}{4}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Results}{4}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax Execution trials}{4}{section*.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}}{4}{figure.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\relax Observation trials}{4}{section*.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}}{4}{figure.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Discussion}{4}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Pure deep learning approach}{4}{section.6}\protected@file@percent }
+\newlabel{sec:deeplearning}{{VI}{4}{Pure deep learning approach}{section.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}1D CNN}{4}{subsection.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Example of a 1D kernel (taken from \cite  {1dkernel})}}{4}{figure.5}\protected@file@percent }
-\newlabel{fig:1dkernel}{{5}{4}{Example of a 1D kernel (taken from \cite {1dkernel})}{figure.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}2D CNN}{4}{subsection.6.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Results}{4}{subsection.6.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {VII}Discussion}{4}{section.7}\protected@file@percent }
 \newlabel{sec:discussion}{{VII}{4}{Discussion}{section.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{4}{section.8}\protected@file@percent }
 \newlabel{sec:conclusion}{{VIII}{4}{Conclusion}{section.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {IX}Ethical risks}{4}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {X}Appendix}{4}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-A}}Experimental setup}{4}{subsection.10.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Experimental setup}}{4}{figure.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{4}{section*.8}\protected@file@percent }
-\bibcite{SUBASI200587}{7}
-\bibcite{NIPS2006_35937e34}{8}
-\bibcite{knn_svm_review}{9}
-\bibcite{1dkernel}{10}
-\gdef \@abspage@last{5}
+\citation{neuropolitics}
+\citation{galli_early_2021}
+\citation{yun_erp_2022}
+\citation{10058960}
+\citation{app11167360}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Ethical risks}{5}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {X}Appendix}{5}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-A}}Experimental setup}{5}{subsection.10.1}\protected@file@percent }
+\bibstyle{IEEEtran}
+\bibdata{ref}
+\bibcite{eegforbci}{1}
+\bibcite{VIEIRA201758}{2}
+\bibcite{EmotionClassificationSVM}{3}
+\bibcite{EEGRandomForset}{4}
+\bibcite{EEGMLReview}{5}
+\bibcite{welch}{6}
+\bibcite{scikitlearn}{7}
+\bibcite{pytorch}{8}
+\bibcite{SUBASI200587}{9}
+\bibcite{NIPS2006_35937e34}{10}
+\bibcite{knn_svm_review}{11}
+\bibcite{eegrfclassif}{12}
+\bibcite{neuropolitics}{13}
+\bibcite{galli_early_2021}{14}
+\bibcite{yun_erp_2022}{15}
+\bibcite{10058960}{16}
+\bibcite{app11167360}{17}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Experimental setup}}{6}{figure.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.8}\protected@file@percent }
+\gdef \@abspage@last{6}

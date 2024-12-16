@@ -17,45 +17,45 @@ Warning--empty journal in welch
 Warning--empty journal in pytorch
 
 Done.
-You've used 10 entries,
+You've used 17 entries,
             4039 wiz_defined-function locations,
-            882 strings with 9972 characters,
-and the built_in function-call counts, 8589 in all, are:
-= -- 623
-> -- 311
-< -- 56
-+ -- 162
-- -- 64
-* -- 449
-:= -- 1250
-add.period$ -- 22
-call.type$ -- 10
-change.case$ -- 14
-chr.to.int$ -- 132
-cite$ -- 12
-duplicate$ -- 604
-empty$ -- 678
-format.name$ -- 75
-if$ -- 1962
+            931 strings with 11767 characters,
+and the built_in function-call counts, 14870 in all, are:
+= -- 1189
+> -- 456
+< -- 105
++ -- 246
+- -- 97
+* -- 764
+:= -- 2210
+add.period$ -- 36
+call.type$ -- 17
+change.case$ -- 22
+chr.to.int$ -- 225
+cite$ -- 19
+duplicate$ -- 1059
+empty$ -- 1120
+format.name$ -- 108
+if$ -- 3419
 int.to.chr$ -- 0
-int.to.str$ -- 10
-missing$ -- 126
-newline$ -- 59
-num.names$ -- 14
-pop$ -- 320
+int.to.str$ -- 17
+missing$ -- 202
+newline$ -- 90
+num.names$ -- 21
+pop$ -- 469
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 2
-skip$ -- 630
+skip$ -- 1142
 stack$ -- 0
-substring$ -- 318
-swap$ -- 489
-text.length$ -- 12
+substring$ -- 602
+swap$ -- 891
+text.length$ -- 30
 text.prefix$ -- 0
 top$ -- 5
-type$ -- 10
+type$ -- 17
 warning$ -- 2
-while$ -- 32
-width$ -- 12
-write$ -- 123
+while$ -- 55
+width$ -- 19
+write$ -- 213
 (There were 2 warnings)

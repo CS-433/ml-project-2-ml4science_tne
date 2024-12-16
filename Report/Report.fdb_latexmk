@@ -1,13 +1,16 @@
 # Fdb version 4
-["bibtex Report"] 1734361464 "Report.aux" "Report.bbl" "Report" 1734361466 0
+["bibtex Report"] 1734385211 "Report.aux" "Report.bbl" "Report" 1734385214 0
   "./IEEEtran.bst" 1731762092 61931 016987d9be15acf51cdd7252d40ecec2 ""
-  "./ref.bib" 1734273318 8546 53e1d42bf411fbfa4aeeeba1d8310178 ""
-  "Report.aux" 1734361466 6712 7da5fe74669661c9d7111886daf2a0ff "pdflatex"
+  "./ref.bib" 1734383319 17443 ce594584f099d72c9bb5a4b97ebd4fde ""
+  "Report.aux" 1734385213 8618 2ae94939d6710adc935055ea1fcb797d "pdflatex"
   (generated)
   "Report.bbl"
   "Report.blg"
   (rewritten before read)
-["pdflatex"] 1734361464 "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734361466 0
+["pdflatex"] 1734385211 "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734385214 0
+  "../figures/accuracies_across_part_ExObs.png" 1734359057 47620 da4f83f7da6196d698e58698054fce94 ""
+  "../figures/accuracies_across_part_ex.png" 1734359057 46503 711d85dc96ef0a3041355e4206581150 ""
+  "../figures/accuracies_across_part_obs.png" 1734359057 47502 27f6c740ceff9d7d2320bb8eb134df6d ""
   "C:/Users/Admin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1730647155 204176 086614611dacd21a235bef257195fd38 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1677404031 23159383 c95e59553718851e613b2905966e647e ""
   "I:/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -70,6 +73,7 @@
   "I:/MiKTeX/tex/latex/base/atbegshi-ltx.sty" 1669844196 3052 30236f0cc243a8651b82240dfd2e8b9d ""
   "I:/MiKTeX/tex/latex/base/atveryend-ltx.sty" 1669844196 2462 8ce5f9a9c63002f2c1af03c262cf29af ""
   "I:/MiKTeX/tex/latex/epstopdf-pkg/epstopdf-base.sty" 1622999586 13886 d1306dcf79a944f6988e688c1785f9ce ""
+  "I:/MiKTeX/tex/latex/etoolbox/etoolbox.sty" 1601894156 46845 3b58f70c6e861a13d927bff09d35ecbc ""
   "I:/MiKTeX/tex/latex/graphics-cfg/graphics.cfg" 1465890692 1224 978390e9c2234eab29404bc21b268d1e ""
   "I:/MiKTeX/tex/latex/graphics-def/pdftex.def" 1663915090 19448 1e988b341dda20961a6b931bcde55519 ""
   "I:/MiKTeX/tex/latex/graphics/graphics.sty" 1665063979 18387 8f900a490197ebaf93c02ae9476d4b09 ""
@@ -92,17 +96,14 @@
   "I:/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657797096 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "I:/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "IEEEtran.cls" 1731762092 206573 001edea5a345402fab5a141a4aef7a27 ""
-  "Report.aux" 1734361466 6712 7da5fe74669661c9d7111886daf2a0ff "pdflatex"
-  "Report.bbl" 1734361464 4106 cd0578208689e71fdac3e4fbad79685a "bibtex Report"
-  "Report.out" 1734361466 3332 fd246aa16a39d8faa377a09bdc0a9595 "pdflatex"
-  "Report.tex" 1734361461 19560 1e37b09a1f74342ed7d7ee5f7cbfaf91 ""
-  "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734361461 19560 1e37b09a1f74342ed7d7ee5f7cbfaf91 ""
-  "images/1d_kernel.png" 1734253406 23911 3edbd5ff44864d83a63899a26e6f6954 ""
+  "Report.aux" 1734385213 8618 2ae94939d6710adc935055ea1fcb797d "pdflatex"
+  "Report.bbl" 1734385211 6597 b2247c3f504eb0df6ab052d953bfdacf "bibtex Report"
+  "Report.out" 1734385213 3342 2274cd505311dbd2856b5c4376f55251 "pdflatex"
+  "Report.tex" 1734385206 23397 b84eca9afeb2cce05dd1f613395f6184 ""
+  "d:/EPFL/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734385206 23397 b84eca9afeb2cce05dd1f613395f6184 ""
   "images/2024-12-11-13-41-23.png" 1733920884 67043 be219e7e3b5f0d108b84c2572b263b7f ""
   "images/2024-12-11-13-41-48.png" 1733920908 50888 5c8e88c42e5dd0f4c957bef4edb172e6 ""
-  "images/2024-12-15-14-35-58.png" 1734270821 52946 66da1f39628edd510f78d7f79bd57121 ""
-  "images/2024-12-15-14-43-56.png" 1734270821 49408 cd447d510edc28b2f9120f9f532c5886 ""
-  "images/2024-12-15-14-54-12.png" 1734270855 49773 bd32688449b5ec2937ec423ecd05ffd3 ""
+  "images/2560px-Human-brain.SVG.png" 1734374439 761982 855c0dd3442ac123e957f777bf007d20 ""
   (generated)
   "Report.aux"
   "Report.log"
