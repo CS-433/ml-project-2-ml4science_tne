@@ -16,6 +16,8 @@
   {}
 \makeatother
 
+\newcommand{\aref}[1]{\hyperref[#1]{Appendix~\ref*{#1}}}
+
 \begin{document}
 \title{Investigating classifiers to decode execution and observation processes from intracranial signals}
 
@@ -92,24 +94,26 @@ The locations of the responsive channels is critical in understanding a potentia
     \label{fig:s6actionrecogchannels}
 \end{figure}
 \FloatBarrier
+TODO: picture above is not correct anymore!
+
 For this participant, the ten most responsive regions were respectively in the precentral gyrus (6), the supramarginal gyrus (2), the postcentral gyrus (1) and the caudal middle frontal gyrus (1), over a total of 68 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
 \begin{table}[h!]
     \centering
     \begin{tabular}{| c | c | c |}
         \hline
-        Part. & \# channels & Main loc. \\
+        Part. & \# channels & Main locations (\# channels) \\
         \hline
-        \textit{s6} & 68 & Prec. (6), postc. (2), cmf. \\
+        \textit{s6} & 40 & Prec. (5), postc. (5) \\
         \hline
-        \textit{s7} & 48 & Prec. (8), postc. (1), thal. (1) \\
+        \textit{s7} & 48 & Prec. (7), postc. (1), cmf. (1), parso. (1) \\
         \hline
-        \textit{s11} & XX & Sf. (5), prec. (4), WMpara. (1) \\
+        \textit{s11} & 27 & Prec. (1),  rmf. (1), sf. (5), WMpara. (2), para. (1) \\
         \hline
-        \textit{s12} & XX & XX \\
+        \textit{s12} & 61 & Ins. (4), sp. (1), pc. (2), para. (1), postc. (2) \\
         \hline
     \end{tabular}
-    \caption{Number of responsive channels in total and location of the ten most responsive per participant. Prec.: precentral gyrus; postc.: postcentral gyrus; sm.: supramarginal gyrus; cmf.: caudal middle frontal gyrus; thal.: thalamus; sf.: superior frontal gyrus; WMpara.: white matter paracentral gyrus}
+    \caption{Number of responsive channels in total and location of the ten most responsive per participant. \aref{tab:acronyms} contains the list of acronyms}
     \label{tab:actionrecogchannellocations}
 \end{table}
 
@@ -223,13 +227,14 @@ In this project, we used various classification models to analyze the classifica
 \newpage
 %%%%%%%%%% ETHICAL RISKS %%%%%%%%%%
 %% 200 to 400 words max., does not count in the 4-page limit
-% Oh well j'avais pas vu le "Digital Ethics Canvas", faudra tout récrire...
 \section{Ethical risks}
-It is clear that the analysis of EEG and other brain signals present a unique set of ethical challenges. Given that we are not sharing the dataset for privacy concern, we will focus on this ethical risk in this brief analysis. EEG signals reveal information not only about the physical health of a subject, but also mental states, emotions and cognitive functions. With the popularization of such tools, we risk losing a fundamental right to mental privacy. This is not only true for emotions, but also religious and political opinions. For instance, neuropolitics\cite{neuropolitics} is a whole field of research that wishes to find the neural roots of our political beliefs. Prediction is just a step further, step that already stated with work such as \cite{galli_early_2021} and \cite{yun_erp_2022}. As current methods require having electrodes (either invasively or not) installed on the scalp or inside it, or to use expensive and complicated machines such as fMRI scanners, only patients ongoing clinical treatment and study subjects are impacted by those risks at the moment. This possible violation of users' cognitive privacy demands for important privacy and anonymization measures when using EEG datasets. If not correctly established, third parties could obtain valuable data on the private mental processes of a user and use it to their advantages. Companies such as Tesla or Meta already invested in such technologies, and not renowned for their privacy-oriented policies. The severity of violating cognitive privacy in a large pool of user is hard to estimate, but without strong policies, a future without private thought is not out of reach.
+It is clear that the analysis of EEG and other brain signals present a unique set of ethical challenges. Given that we are not sharing the dataset for privacy concern, we will focus on this ethical risk in this brief analysis. EEG signals reveal information not only about the physical health of a subject, but also mental states, emotions and cognitive functions. With the popularization of such tools, we risk losing a fundamental right to mental privacy. This is not only true for emotions, but also religious and political opinions. For instance, neuropolitics\cite{neuropolitics} is a whole field of research that wishes to find the neural roots of our political beliefs. Prediction is just a step further, step that already stated with work such as \cite{galli_early_2021} and \cite{yun_erp_2022}.
 
-Without any need for speculation on the future of brain signal analysis, it is certain that EEG signals can be used to identify a person. For example, tools for User Authentication via EEG signals already exists\cite{10058960}. It is then clear that, when in possession of private EEG data, precautions must be taken to ensure that this data remains within the restricted pool of authorized researchers who have been granted access. In this project, we were careful not to upload this data on any online repository (e.g. GitHub), and we will not give the dataset to correctors outside the TNE laboratory. Moreover, we did not access any personal information from the participants involved.
+As current methods require possible invasive electrodes, or to use expensive and complicated machines such as fMRI scanners, primarily patients ongoing clinical treatment and study subjects are affected by those risks at the moment. However, the potential violation of cognitive privacy underscores the need for robust privacy and anonymization measures when using EEG datasets. If not correctly established, third parties could gain valuable data on the private mental processes of a user and use it to their advantages. Companies such as Tesla or Meta already invested in such technologies, and not renowned for their privacy-oriented policies. The severity and ramifications of cognitive privacy violating in a large pool of user is hard to quantify, but without strict policies, the possibility of a future without private thought becomes alarmingly plausible.
 
-Advanced methods exist to encrypt data while allowing computations on it\cite{app11167360}. Unfortunately, the time and scope of this project did not permit us using these technologies.
+Even without speculating about future developments in brain signal analysis, EEG signals are already used in identifying individuals. For example, tools for User Authentication via EEG signals already exists\cite{10058960}. It is then clear that, when in possession of private EEG data, precautions must be taken to ensure that this data remains within the restricted pool of authorized researchers who have been granted access. In this project, we were careful not to upload this data on any online repository (e.g. GitHub), and we will not give the dataset to correctors outside the TNE laboratory. Moreover, we did not access any personal information from the participants involved.
+
+Advanced methods exist to encrypt data while allowing computations on it\cite{app11167360}. Unfortunately, the time and scope of this project did not permit the implementation of such technologies.
 
 %% Not in the 4-page limit
 \section{Appendix}
@@ -243,6 +248,28 @@ The participants were asked to keep their hands on the resting positions. The le
 \end{figure}
 \FloatBarrier
 
+\subsection{Acronyms}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | l |}
+        \hline
+        Acronym & Corresponding region \\
+        \hline
+        cmf. & caudal middle frontal gyrus \\
+        ins. & Insula \\
+        para. & paracentral \\
+        parso. & parsopercularis \\
+        pc. & posterior cingulate \\
+        postc. & postcentral gyrus \\
+        prec. & precentral gyrus \\
+        rmf. & rostral middle frontal \\
+        sf. & superior frontal \\
+        WMpara. & White Matter paracentral \\
+        \hline
+    \end{tabular}
+    \caption{List of acronyms for the brain regions}
+    \label{tab:acronyms}
+\end{table}
 
 % \begin{figure}[tbp]
 %   \centering

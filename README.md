@@ -15,6 +15,8 @@ The project will focus on the following tasks:
 
 The dataset contains intracranial neural recordings from 4 participants implanted with sEEG electrodes at different cortical locations. It includes raw data, trial and trigger information, and electrode location data for each channel.
 
+For privacy reasons, neither the dataset nor the data extracted from it are shared outside of the TNE laboratory. This has been agreed with CS-433 team before the start of the project.
+
 ### Experimental settings
 
 Participants performed reach-to-grasp actions using two distinct grip types: a precision grasp and a power grasp. For the observation task, participants watched an experimenter perform these movements in front of them.
@@ -53,6 +55,7 @@ It is first necessary to run ``load_data.py`` to generate and save all the relev
 - ``MR_freqs_obs.ipynb``: in this notebook, we analyze the importance of each frequency bands on the accuracy, specifically for the Movement Recognition in observation tasks.
 - ``MR_CNN_ex.ipynb``: CNN models applied to the Movement Recognition in execution tasks.
 - ``MR_CNN_obs.ipynb``: CNN models applied to the Movement Recognition in observation tasks.
+- ``visualisation_preprocessing.ipynb`: visualisation of the channels and their frequency.
 
 ### Auxiliary files
 
