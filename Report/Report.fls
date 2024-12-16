@@ -561,8 +561,6 @@ INPUT I:\MiKTeX\fonts\tfm\adobe\times\ptmr8r.tfm
 INPUT I:\MiKTeX\fonts\tfm\adobe\times\ptmr8r.tfm
 INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf
 INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf
-INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmri7t.vf
-INPUT I:\MiKTeX\fonts\tfm\adobe\times\ptmri8r.tfm
 INPUT I:\MiKTeX\fonts\tfm\public\cm\cmr8.tfm
 INPUT I:\MiKTeX\fonts\tfm\public\cm\cmr6.tfm
 INPUT I:\MiKTeX\fonts\tfm\public\cm\cmmi8.tfm
@@ -579,6 +577,8 @@ INPUT .\images\2024-12-15-14-35-58.png
 INPUT .\images\2024-12-15-14-35-58.png
 INPUT .\images\2024-12-15-14-35-58.png
 INPUT .\images\2024-12-15-14-35-58.png
+INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmri7t.vf
+INPUT I:\MiKTeX\fonts\tfm\adobe\times\ptmri8r.tfm
 INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmb7t.vf
 INPUT I:\MiKTeX\fonts\tfm\adobe\times\ptmb8r.tfm
 INPUT I:\MiKTeX\fonts\vf\adobe\times\ptmr7t.vf

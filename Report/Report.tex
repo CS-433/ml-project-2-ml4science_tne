@@ -6,30 +6,30 @@
 \usepackage{placeins}
 
 \begin{document}
-\title{ML Project 2 - Report}
+\title{Investigating classifiers to decode execution and observation processes from intracranial signals}
 
 \author{
   Sarah Mikami, Samuel Waridel and Florian Kolly \\
-  \textit{CS433, EPFL 2024}
+  \textit{EPFL 2024 | CS433}
   \textit{ML4Science project | TNE Laboratory}
 }
 
 \maketitle
 
 \begin{abstract}
-    Machine Learning (ML) techniques are increasingly utilized in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict various physical and mental features, often with great success. In this work, we apply similar tools in different classification tasks: classification of action (executing a task vs. observing a task) and classification of movements (precision movement vs. force movement). Our results demonstrate that ML models, including Deep Learning models, can effectively classify actions based on EEG features. However, we also demonstrate that, for tasks where the subject is passively observing different movements, the models fail to capture the small differences in brain activity and therefore achieve low performances.
+    Machine Learning (ML) techniques are increasingly utilized in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict various physical and mental features, often with great success. In this work, we apply similar tools in different classification tasks: classification of action (executing a task vs. observing a task) and classification of movements (precision grasp vs. power grasp). There is ongoing debate over the presence of an action-observation network in cortical signals. Our goal is to characterize these signals and apply decoding and classification models to explore similarities and differences between execution and observation processes, focusing on upper limbs movements. Our results demonstrate that ML models, including Deep Learning models, can effectively classify actions based on EEG features. However, we also demonstrate that, for tasks where the subject is passively observing different movements, the models fail to capture the small differences in brain activity and therefore achieve low performances.
 \end{abstract}
 
 \section{Introduction}
 Machine Learning (ML) is has become a central tool in neuroscience, with applications in neural engineering (e.g. Brain-Computer Interfaces, BCIs), diagnostics and fundamental research. For instance, Jalilifard et al. \cite{EmotionClassificationSVM} demonstrated the efficacy of Support Vector Machine (SVM) classifiers in basic emotions recognition, while Bose et al. \cite{EEGRandomForset} used Random Forest classifiers to automate seizure detection in epileptic patients with high accuracy. Indeed, all major ML methods have been applied to neural signals classification\cite{EEGMLReview}.
 
-In this work, we examine the applications of such ML techniques in three classification problems using electroencephalography (EEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small versus a large object; iii) differentiating between observing the grasp of a small versus a large object.
+In this work, we examine the applications of such ML techniques in three classification problems using electroencephalography (EEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small versus a large object; iii) differentiating between observing the grasp of a small versus a large object. We use intracranial sEEG signals from epileptic patients who were already implanted with electrodes in different brain areas.
 
 Section \ref{sec:problem} outlines the data acquisition process and its relevance to our classification tasks. In Section \ref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. Sections \ref{sec:actionrecognition} and \ref{sec:objectrecognition} present the models applied to our classification problems and their performance. In Section \ref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) to directly extract features from the EEG signal. Finally, we discuss our results in Section \ref{sec:discussion} and conclude in Section \ref{sec:conclusion}.
 
 \section{Data acquisition and problem specification}
 \label{sec:problem}
-The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (force-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
+The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
 
 \begin{figure}[h!]
   \center
@@ -111,7 +111,7 @@ Which freq. bands are important? Is it the same across subjects?
 
 \section{Movement recognition}
 \label{sec:objectrecognition}
-For the second and third type of classification tasks, we analyze whether ML tools are able to classify the type of movement done (pinch grasp or force grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we reduce the restrictions to select the \textit{relevant channels}: it suffices for a channel to be relevant in execution or in observation respectfully to be included.
+For the second and third type of classification tasks, we analyze whether ML tools are able to classify the type of movement done (precision grasp or power grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we reduce the restrictions to select the \textit{relevant channels}: it suffices for a channel to be relevant in execution or in observation respectfully to be included.
 
 \subsection{Responsive channels}
 Which regions have the most responsive channels, are they the same for execution \& observation?
@@ -131,7 +131,7 @@ We use the same families of model as in the previous part, and this for both cla
 As expected, our results are significantly lower in those tasks than in the first part. We also observe a drop in performance between execution and observation.
 
 \paragraph{Execution trials}
-The best model when classifying whether the subject has done a precision or force movement is ... TODO
+The best model when classifying whether the subject has done a precision or power movement is ... TODO
 
 \begin{figure}[h!]
   \center
@@ -141,7 +141,7 @@ The best model when classifying whether the subject has done a precision or forc
 \FloatBarrier
 
 \paragraph{Observation trials}
-The best model when classifying whether the subject has seen a precision or force movement is ... TODO
+The best model when classifying whether the subject has seen a precision or power movement is ... TODO
 
 \begin{figure}[h!]
   \center
@@ -199,7 +199,7 @@ In this project, we used various classification tools to
 %% Not in the 4-page limit
 \section{Appendix}
 \subsection{Experimental setup}
-The participants were asked to keep their hands on the resting positions. The led lights are used both to indicate who will realise the action and to specify which objects has to be grasped. A.) execution trial: the participant must pick the small green ball using a precise pinch grasp. B.) observation trial: the experimenter must pick the large red ball using a force grasp. C.) control action, not used in this project.
+The participants were asked to keep their hands on the resting positions. The led lights are used both to indicate who will realise the action and to specify which objects has to be grasped. A.) execution trial: the participant must pick the small green ball using a precise pinch grasp. B.) observation trial: the experimenter must pick the large red ball using a power grasp. C.) control action, not used in this project.
 
 \begin{figure}[h!]
     \center
