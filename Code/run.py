@@ -78,7 +78,7 @@ def run_models(accuracies, features):
     acc /= len(testset)
     accuracies['MLP'].append(acc)
     
-def plot_accuracy(accuracies, title, task):
+def plot_accuracy(accuracies, title, task, font_loc='best'):
     
     plt.rcParams["font.family"] = "Times New Roman"
     SMALL_SIZE = 20
@@ -96,51 +96,53 @@ def plot_accuracy(accuracies, title, task):
 
     models = accuracies.keys()
 
-    dataset_values = [accuracies[model] for model in models]
+    dataset_values = np.array([accuracies[model] for model in models])
 
     x = np.arange(len(models))
-    width = 0.35
+    width = .8
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    fig.suptitle(title)
 
-    bars1 = ax.bar(x - width/4, dataset_values[:,0], width, label='s6')
-    bars2 = ax.bar(x - width/2, dataset_values[:,1], width, label='s7')
-    bars3 = ax.bar(x + width/2, dataset_values[:,2], width, label='s11')
-    bars4 = ax.bar(x + width/4, dataset_values[:,3], width, label='s12')
+    bars1 = ax.bar(x - 3*width/8, dataset_values[:,0], width/4, label='s6')
+    bars2 = ax.bar(x - width/8, dataset_values[:,1], width/4, label='s7')
+    bars3 = ax.bar(x + width/8, dataset_values[:,2], width/4, label='s11')
+    bars4 = ax.bar(x + 3*width/8, dataset_values[:,3], width/4, label='s12')
 
     ax.set_xticks(x)
     ax.set_xticklabels(models)
 
     ax.set_ylabel('Accuracy')
     ax.set_xlabel('Models')
-    ax.set_title('Accuracies by model (execution)')
+    ax.set_title(title)
 
     ax.set_ylim(0,1)
 
-    ax.legend()
+    ax.legend(loc=font_loc,ncols=2, fontsize='x-small')
 
     for bar in bars1:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/16, yval, round(yval, 2), va='bottom', fontsize=15)
+        ax.text(bar.get_x(), yval, round(yval, 2), va='bottom', fontsize=10)
         
     for bar in bars2:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/16, yval, round(yval, 2), va='bottom', fontsize=15)
+        ax.text(bar.get_x(), yval, round(yval, 2), va='bottom', fontsize=10)
         
     for bar in bars3:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/16, yval, round(yval, 2), va='bottom', fontsize=15)
+        ax.text(bar.get_x(), yval, round(yval, 2), va='bottom', fontsize=10)
         
     for bar in bars4:  
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/16, yval, round(yval, 2), va='bottom', fontsize=15)
+        ax.text(bar.get_x(), yval, round(yval, 2), va='bottom', fontsize=10)
+        
+    plt.axhline(y=0.5, color='k', linestyle='--', label='Chance level')
         
     plt.tight_layout()
     saved_dir = os.path.join(os.getcwd(), 'figures')
     if not os.path.exists(saved_dir):
         os.makedirs(saved_dir)
     plt.savefig(f'figures/accuracies_across_part_{task}.png')
+
 
 # load.py needs to be run before this script
 if __name__ == '__main__':
@@ -159,9 +161,6 @@ if __name__ == '__main__':
         run_models(accuracies_ex, ex_features)
         run_models(accuracies_obs, obs_features)
         
-    plot_accuracy(accuracies_ex, 'Accuracies by model (execution)', 'ex')
-    plot_accuracy(accuracies_obs, 'Accuracies by model (observation)', 'obs')
-    plot_accuracy(accuracies_ExObs, 'Accuracies by model (action recognition)', 'ExObs')
     
     saved_dir = os.path.join(os.getcwd(), 'saved')
     if not os.path.exists(saved_dir):
@@ -172,4 +171,8 @@ if __name__ == '__main__':
         pickle.dump(accuracies_obs, f, pickle.HIGHEST_PROTOCOL)
     with open('saved/accuracies_across_part_ExObs.pkl', 'wb') as f:
         pickle.dump(accuracies_ExObs, f, pickle.HIGHEST_PROTOCOL)
+        
+    plot_accuracy(accuracies_ex, 'Accuracies by model (execution)', 'ex')
+    plot_accuracy(accuracies_obs, 'Accuracies by model (observation)', 'obs')
+    plot_accuracy(accuracies_ExObs, 'Accuracies by model (action recognition)', 'ExObs', font_loc='lower left')
     
