@@ -38,28 +38,32 @@ class Participant:
             key=lambda channel: channel.p_value_Ex
         )
         self.relevant_channels_both = sorted(
-            [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex],
-            key=lambda channel: channel.p_value_Obs + channel.p_value_Ex
+            [channel for channel in self.channels if channel.p_value_both < alpha],
+            key=lambda channel: channel.p_value_both
         )
 
     @staticmethod
     def load_from_pickle(data_path):
         return pickle.load(open(data_path, 'rb'))
 
-    def _get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def _get_features_per_session_ExObs(self, session, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        relevant_channels = self.relevant_channels_both
+        if channels != 'all':
+            relevant_channels = [channel for i, channel in enumerate(self.relevant_channels_both) if i in channels]
         trial_dict = {}
         labels = []
         for trial in tqdm(session.trials):
             labels.append(trial.action_type)
-            trial_dict = self.get_features(trial_dict, trial, self.relevant_channels_both, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size)
                                        
         return labels, pd.DataFrame(trial_dict)
 
-    def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_ExObs(self, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        assert channels == 'all' or type(channels) == list, 'The channels parameter should be either "all" or a list of channel indices'
         all_labels = []
         all_features = []
         for session in self.sessions:
-            labels, features_session = self._get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_ExObs(session, channels, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
             all_features.append(features_session)
         all_features = pd.concat(all_features)
@@ -195,6 +199,9 @@ class Channel:
         self.idx = idx
         self.location = location
         self.participant = participant
+
+        pds_baseline_both = []
+        pds_aroundObjGrasped_both = []
         
         pds_baseline_Ex = []
         pds_aroundObjGrasped_Ex = []
@@ -204,6 +211,8 @@ class Channel:
         
         for session in sessions:
             for trial in session.trials:
+                pds_baseline_both.append(trial.get_pds_baseline(idx))
+                pds_aroundObjGrasped_both.append(trial.get_pds_aroundObjGrasped(idx))
                 if trial.action_type == 'E':
                     pds_baseline_Ex.append(trial.get_pds_baseline(idx))
                     pds_aroundObjGrasped_Ex.append(trial.get_pds_aroundObjGrasped(idx))
@@ -211,11 +220,17 @@ class Channel:
                     pds_baseline_Obs.append(trial.get_pds_baseline(idx))
                     pds_aroundObjGrasped_Obs.append(trial.get_pds_aroundObjGrasped(idx))
                 
+        self.pds_baseline_both = np.mean(np.array(pds_baseline_both), axis=0)
+        self.pds_aroundObjGrasped_both = np.mean(np.array(pds_aroundObjGrasped_both), axis=0)
         self.pds_baseline_Ex = np.mean(np.array(pds_baseline_Ex), axis=0)
         self.pds_aroundObjGrasped_Ex = np.mean(np.array(pds_aroundObjGrasped_Ex), axis=0)
         self.pds_baseline_Obs = np.mean(np.array(pds_baseline_Obs), axis=0)
         self.pds_aroundObjGrasped_Obs = np.mean(np.array(pds_aroundObjGrasped_Obs), axis=0)
         
+        self.absolute_psd_difference_both = np.abs(self.pds_aroundObjGrasped_both - self.pds_baseline_both)
+        self.corr_both = correlate(self.pds_baseline_both, self.pds_aroundObjGrasped_both)
+        self.t_stat_both, self.p_value_both = ttest_rel(self.pds_baseline_both[1], self.pds_aroundObjGrasped_both[1])
+
         self.absolute_psd_difference_Ex = np.abs(self.pds_aroundObjGrasped_Ex - self.pds_baseline_Ex)
         self.corr_Ex = correlate(self.pds_baseline_Ex, self.pds_aroundObjGrasped_Ex)
         self.t_stat_Ex, self.p_value_Ex = ttest_rel(self.pds_baseline_Ex[1], self.pds_aroundObjGrasped_Ex[1])
