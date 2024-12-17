@@ -20,6 +20,12 @@ EPOCHS = 10
 WEIGHT_DECAY = 1e-3
 
 def run_models(accuracies, features):
+    """Run all models on the same features and stores accuracies in a dictionary.
+
+    Args:
+        accuracies (dict): prepared dictionary for the accuracies.
+        features (pd.DataFrame): DataFrame containing the features.
+    """
     
     X = features.drop('label', axis=1)
     y = features['label']
@@ -79,6 +85,14 @@ def run_models(accuracies, features):
     accuracies['MLP'].append(acc)
     
 def plot_accuracy(accuracies, title, task, font_loc='best'):
+    """Utility function to plot the accuracy of different models and participants.
+
+    Args:
+        accuracies (dict): dictionary of accuracies.
+        title (str): title of the plot.
+        task (str): indicates the classification task.
+        font_loc (str, optional): location of the legend. Defaults to 'best'.
+    """
     
     plt.rcParams["font.family"] = "Times New Roman"
     SMALL_SIZE = 20
