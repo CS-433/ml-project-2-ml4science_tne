@@ -10,7 +10,19 @@ from sklearn.metrics import accuracy_score
 from dataset import Participant
 from torch.utils.data import DataLoader
 
-random.seed(RANDOM_STATE)
+# Reproducibility
+seed_num = RANDOM_STATE # This seed will be used for all random number generators
+torch.use_deterministic_algorithms(True) # PyTorch will use deterministic algorithms fro operations with stochastic behavior like dropout
+random.seed(seed_num) # Python's random will use seed_num
+np.random.seed(seed_num) # NumPy's random number generator will use seed_num
+torch.manual_seed(seed_num) # PyTorch's random number will use seed_num
+def seed_worker(worker_id): # Seed synchronized on all parallel works
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+g = torch.Generator() # Creates an instance of PyTorch's random number generator
+g.manual_seed(seed_num) # Set PyTorch generator g to seed_num
+
 TEST_SIZE = 0.3
 PCA_EXPL_VAR = 0.95
 
@@ -158,8 +170,12 @@ def plot_accuracy(accuracies, title, task, font_loc='best'):
     plt.savefig(f'figures/accuracies_across_part_{task}.png')
 
 
-# load.py needs to be run before this script
+
 if __name__ == '__main__':
+    
+    # load.py needs to be run before this script
+    for part_name in PARTICIPANTS:
+        if not os.path.exists(f'saved/{part_name}.pkl'): raise FileNotFoundError(f'Participant {part_name} not found - Run load.py first')
     
     accuracies_ExObs = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
     accuracies_ex = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
