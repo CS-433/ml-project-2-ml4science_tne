@@ -17,20 +17,20 @@ def load_features_mvt(participant):
     ex_features = participant.get_features_all_sessions_mvt('E')
     ex_features.to_hdf(f'saved/ex_features_{part_name}_mvt.h5', 'df', mode='w', data_columns=True)
     
-    ex_baseline_features = participant.get_features_all_sessions_unresponsive(len(participant.relevant_channels_ex), movtype='E')
+    ex_baseline_features = participant.get_features_all_sessions_unresponsive(movtype='E')
     ex_baseline_features.to_hdf(f'saved/ex_baseline_features_{part_name}_mvt.h5', 'df', mode='w', data_columns=True)
     
     obs_features = participant.get_features_all_sessions_mvt('O')
     obs_features.to_hdf(f'saved/obs_features_{part_name}_mvt.h5', 'df', mode='w', data_columns=True)
     
-    obs_baseline_features = participant.get_features_all_sessions_unresponsive(len(participant.relevant_channels_obs), movtype='O')
+    obs_baseline_features = participant.get_features_all_sessions_unresponsive(movtype='O')
     obs_baseline_features.to_hdf(f'saved/obs_baseline_features_{part_name}_mvt.h5', 'df', mode='w', data_columns=True)
     
 def load_features_ExObs(participant):  
     features = participant.get_features_all_sessions_ExObs()
     features.to_hdf(f'saved/features_{part_name}_ExObs.h5', 'df', mode='w', data_columns=True)
     
-    baseline_features = participant.get_features_all_sessions_unresponsive(len(participant.relevant_channels_both), movtype=None)
+    baseline_features = participant.get_features_all_sessions_unresponsive(movtype=None)
     baseline_features.to_hdf(f'saved/baseline_features_{part_name}_ExObs.h5', 'df', mode='w', data_columns=True)
     
     
