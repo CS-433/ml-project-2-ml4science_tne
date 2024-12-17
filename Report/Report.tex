@@ -68,7 +68,7 @@ The signals (one per channel) of each trial is preprocessed in three steps:
 \end{enumerate}
 
 \subsection{Feature extraction}
-TODO
+TODO SARAH
 
 Talk especially about the idea of frequency range! A plot would be nice.
 
@@ -84,7 +84,7 @@ Talk especially about the idea of frequency range! A plot would be nice.
 \label{sec:actionrecognition}
 In this first classification task, we train and optimize different family of ML models to predict whether the participant was executing the movement or observing it. The analysis is restricted to channels responsive to both movements. Given the distinct nature of the tasks being compared, we anticipate strong performance across all models.
 
-\subsection{Responsive channels}
+\subsection{Responsivity of channels}
 The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the \(\alpha\) value of the t-test. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels.
 
 \begin{figure}[h!]
@@ -94,7 +94,7 @@ The locations of the responsive channels is critical in understanding a potentia
     \label{fig:s6actionrecogchannels}
 \end{figure}
 \FloatBarrier
-TODO: picture above is not correct anymore!
+TODO: SAMUEL picture above is not correct anymore!
 
 For this participant, the ten most responsive regions were respectively in the precentral gyrus (6), the supramarginal gyrus (2), the postcentral gyrus (1) and the caudal middle frontal gyrus (1), over a total of 68 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
@@ -126,6 +126,9 @@ We see that the regions with the most importance are similar across participants
 
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
+\subsection{Analysis of frequency bands}
+TODO SARAH
+
 \subsection{Baseline data}
 In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive to this measure, and computed features from them. We will run each model on both sets of data, and a comparison will be done in the results.
 
@@ -144,6 +147,8 @@ Random Forest (RF) classifiers combine the output of multiple decision trees to 
 \paragraph{MLP}
 In addition to traditional ML models, we also train Multilayer Perceptron (MLP) models. We chose to include MLP as it is widely used in EEG classification\footnote{3'610 results for 'EEG MLP classification' on Google Scholar in 2024 at the time of writing}. The main issue with MLP is that they are universal approximators and are thus prone to overfitting, especially for datasets as small as ours.
 
+We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly include
+
 \subsection{Results}
 We tested all models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
 
@@ -157,13 +162,12 @@ We tested all models on the same test set. As expected, all models obtained very
 \subsection{Discussion}
 As expected, we obtain very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain much stronger accuracies when given carefully crafted features.
 
-TODO there is a problem with the frequencies, we need to check the code! If solved, let's talk about the frequencies here.
-
 \section{Movement recognition}
 \label{sec:objectrecognition}
 For the second and third type of classification tasks, we analyze whether ML tools are able to classify the type of movement done (precision grasp or power grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we reduce the restrictions to select the \textit{responsive channels}: it suffices for a channel to be responsive in execution or in observation respectfully to be included.
 
 \subsection{Responsive channels}
+TODO SAMUEL
 Which regions have the most responsive channels, are they the same for execution \& observation?
 
 \begin{itemize}
@@ -174,6 +178,9 @@ Which regions have the most responsive channels, are they the same for execution
 
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
+\subsection{Analysis of frequency bands}
+TODO SARAH
+
 \subsection{Models}
 We use the same families of model as in the previous part, and this for both classifying in execution tasks and in observation tasks.
 
@@ -181,6 +188,7 @@ We use the same families of model as in the previous part, and this for both cla
 As expected, our results are significantly lower in those tasks than in the first part. We also observe a drop in performance between execution and observation.
 
 \paragraph{Execution trials}
+TODO FLORIAN
 The best model when classifying whether the subject has done a precision or power movement is ... TODO
 
 \begin{figure}[h!]
@@ -191,6 +199,7 @@ The best model when classifying whether the subject has done a precision or powe
 \FloatBarrier
 
 \paragraph{Observation trials}
+TODO FLORIAN
 The best model when classifying whether the subject has seen a precision or power movement is ... TODO
 
 \begin{figure}[h!]
@@ -201,6 +210,7 @@ The best model when classifying whether the subject has seen a precision or powe
 \FloatBarrier
 
 \subsection{Discussion}
+TODO SARAH
 Which freq. bands are important? Is it the same across subjects?
 
 \section{Pure deep learning approach}
@@ -218,7 +228,7 @@ Surprisingly, both types of CNN achieve high performance on the action recogniti
 
 \section{Discussion}
 \label{sec:discussion}
-TODO
+TODO ALL
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -278,7 +288,6 @@ The participants were asked to keep their hands on the resting positions. The le
 %   \vspace{-3mm}
 %   \label{fig:denoise-fourier}
 % \end{figure}
-
 
 \section*{Acknowledgements}
 We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
