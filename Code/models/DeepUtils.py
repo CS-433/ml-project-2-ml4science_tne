@@ -1,3 +1,4 @@
+from tabnanny import verbose
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -14,7 +15,7 @@ class Trainer():
         self.save_path = save_path
         self.device = device
 
-    def train(self, train_loader, val_loader):
+    def train(self, train_loader, val_loader, verbose=True):
         valid_loss_min = np.Inf
 
         for epoch in range(self.epochs):
@@ -24,7 +25,7 @@ class Trainer():
             valid_acc = 0.0
 
             self.model.train()
-            for input, target in tqdm(train_loader, desc=f'Epoch {epoch+1}/{self.epochs} - Training'):
+            for input, target in (tqdm(train_loader, desc=f'Epoch {epoch+1}/{self.epochs} - Training') if verbose else train_loader):
                 input, target = input.to(self.device), target.to(self.device)
                 self.optimizer.zero_grad()
                 logits = self.model(input)
@@ -39,11 +40,12 @@ class Trainer():
             train_loss /= len(train_loader.dataset)
             train_acc /= len(train_loader.dataset)
 
-            print(f'Epoch: {epoch+1} \tTraining Loss: {train_loss:.6f} \tTraining Acc: {train_acc:.6f}')
+            if verbose:
+                print(f'Epoch: {epoch+1} \tTraining Loss: {train_loss:.6f} \tTraining Acc: {train_acc:.6f}')
 
             self.model.eval()
             with torch.no_grad():
-                for input, target in tqdm(val_loader, desc=f'Epoch {epoch+1}/{self.epochs} - Validation'):
+                for input, target in (tqdm(val_loader, desc=f'Epoch {epoch+1}/{self.epochs} - Validation') if verbose else val_loader):
                     input, target = input.to(self.device), target.to(self.device)
                     logits = self.model(input)
                     _, preds = torch.max(logits, 1)
@@ -53,13 +55,17 @@ class Trainer():
 
             valid_loss /= len(val_loader.dataset)
             valid_acc /= len(val_loader.dataset)
-                
-            print(f'Epoch: {epoch+1} \tValidation Loss: {valid_loss:.6f} \tValidation Acc: {valid_acc:.6f}')
+
+            if verbose:    
+                print(f'Epoch: {epoch+1} \tValidation Loss: {valid_loss:.6f} \tValidation Acc: {valid_acc:.6f}')
             
             if valid_loss <= valid_loss_min:
-                print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(valid_loss_min, valid_loss))
+                if verbose:
+                    print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model...'.format(valid_loss_min, valid_loss))
                 torch.save(self.model.state_dict(), self.save_path)
                 valid_loss_min = valid_loss
+
+        return valid_loss
 
 class DfDataset(torch.utils.data.Dataset):
     def __init__(self, features, labels):
