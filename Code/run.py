@@ -65,7 +65,7 @@ def run_models(accuracies, features):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    mlp = MLP(X_train.shape[1], 2, layers=(16, 16))
+    mlp = MLP(X_train.shape[1], 2, layers=(8, 8))
     trainset = DfDataset(X_train, y_train)
     valset = DfDataset(X_val, y_val)
     train_loader = DataLoader(trainset, batch_size=4, shuffle=True)
