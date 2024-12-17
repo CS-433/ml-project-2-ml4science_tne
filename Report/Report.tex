@@ -89,14 +89,13 @@ The locations of the responsive channels is critical in understanding a potentia
 
 \begin{figure}[h!]
     \center
-    \includegraphics[width=0.8\linewidth]{images/2560px-Human-brain.SVG.png}
-    \caption{Locations of the ten most responsive channels in participant \textit{s6}: the number in parenthesis is the number of top-10 channels in this region. Edited from Hugh Guiney, CC BY-SA 3.0 \url{https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}
+    \includegraphics[width=0.8\linewidth]{images/Human-brain.png}
+    \caption{Locations of the ten most responsive channels in participant \textit{s6}: The green zone (1) represents the precentral gyrus, and the blue zone(2) corresponds to the postcentral gyrus. Edited from Hugh Guiney, CC BY-SA 3.0 \url{https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}
     \label{fig:s6actionrecogchannels}
 \end{figure}
 \FloatBarrier
-TODO: SAMUEL picture above is not correct anymore!
 
-For this participant, the ten most responsive regions were respectively in the precentral gyrus (6), the supramarginal gyrus (2), the postcentral gyrus (1) and the caudal middle frontal gyrus (1), over a total of 68 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
+For this participant, the ten most responsive regions were respectively in the precentral gyrus (5), and the postcentral gyrus (5) over a total of 40 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
 \begin{table}[h!]
     \centering
@@ -104,25 +103,24 @@ For this participant, the ten most responsive regions were respectively in the p
         \hline
         Part. & \# channels & Main locations (\# channels) \\
         \hline
-        \textit{s6} & 40 & Prec. (5), postc. (5) \\
+        \textit{s6} & 40 & prec. (5), postc. (5) \\
         \hline
-        \textit{s7} & 48 & Prec. (7), postc. (1), cmf. (1), parso. (1) \\
+        \textit{s7} & 26 & prec. (7), postc. (1), cmf. (1), parso. (1) \\
         \hline
-        \textit{s11} & 27 & Prec. (1),  rmf. (1), sf. (5), WMpara. (2), para. (1) \\
+        \textit{s11} & 27 & prec. (1),  rmf. (1), sf. (5), WMpara. (2), para. (1) \\
         \hline
-        \textit{s12} & 61 & Ins. (4), sp. (1), pc. (2), para. (1), postc. (2) \\
+        \textit{s12} & 29 & ins. (4), sp. (1), pc. (2), para. (1), postc. (2) \\
         \hline
     \end{tabular}
     \caption{Number of responsive channels in total and location of the ten most responsive per participant. \aref{tab:acronyms} contains the list of acronyms}
     \label{tab:actionrecogchannellocations}
 \end{table}
 
-We see that the regions with the most importance are similar across participants.
+For this task we see that the regions vary quite a bit between participants. Participant 6 has only two regions with responsive channels, while participant 12 has five. But on the contrary, the number of responsive channels is quite similar for most participants, sitting around 30, with the exception of participant 6 which has 40 channels.
 
-\begin{itemize}
-    \item Across participant: same region? same nb of responsive channels?
-    \item Do we find the expected regions? Link to mvt execution / observation?
-\end{itemize}
+We see that the regions with the most importance are similar across participants are directly linked to movement (ex : prec.) or somatosensory information (ex : postc.). This makes sense as the task for the participants is linked with active hand movement and needs sensory feedback to perform the tasks. It is interesting to note that some of the participants (s11 and s12) have activity in areas that are more related to self awareness and self perception (ex: sf. and ins.), which could be much more linked to the observation trials.
+
+TODO?
 
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
@@ -167,14 +165,51 @@ As expected, we obtain very good accuracies over all models and participants. Ra
 For the second and third type of classification tasks, we analyze whether ML tools are able to classify the type of movement done (precision grasp or power grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we reduce the restrictions to select the \textit{responsive channels}: it suffices for a channel to be responsive in execution or in observation respectfully to be included.
 
 \subsection{Responsive channels}
-TODO SAMUEL
-Which regions have the most responsive channels, are they the same for execution \& observation?
+For the second and third classification tasks, we selected the channels that were responsive to the execution or observation of the movements. The number of responsive channels and the locations of the ten most responsive channels for each participant are shown below.
 
-\begin{itemize}
-    \item Across participant: same region? same nb of responsive channels?
-    \item Are the channels responsive for obs also responsive for ex? Vice-versa?
-    \item Do we find the expected regions? Link to mvt execution / observation?
-\end{itemize}
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{| c | c | c |}
+      \hline
+      Part. & \# channels & locations for execution (\# channels) \\
+      \hline
+      \textit{s6} & 68 & spm. (2), postc. (1), prec. (6), cmf. (1) \\
+      \hline
+      \textit{s7} & 48 & postc. (1), th. (1), prec. (8)\\
+      \hline
+      \textit{s11} & 52 & prec. (4), sf. (5), WMpara. (1)\\
+      \hline
+      \textit{s12} & 76 & para. (1), pc. (3), postc. (2), sp. (1), ins. (3)\\
+      \hline
+  \end{tabular}
+  \caption{Number of responsive channels for execution trials and location of the ten most responsive per participant. \aref{tab:acronyms} contains the list of acronyms}
+  \label{tab:exmovchannellocations}
+\end{table}
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{| c | c | c |}
+      \hline
+      Part. & \# channels & locations for observation (\# channels) \\
+      \hline
+      \textit{s6} & 51 & postc. (6), prec. (4)\\
+      \hline
+      \textit{s7} & 33 & cmf. (1), postc. (2), prec. (7) \\
+      \hline
+      \textit{s11} & 43 & pren. (1), cmf. (1), para. (1), sf. (6), rmf. (1)\\
+      \hline
+      \textit{s12} & 48 & para. (2), pc. (3), postc. (1), sf. (1), prec. (1), ins. (2)\\
+      \hline
+  \end{tabular}
+  \caption{Number of responsive channels for observation trials and location of the ten most responsive per participant. \aref{tab:acronyms} contains the list of acronyms}
+  \label{tab:obsmovchannellocations}
+\end{table}
+
+In both of these tasts, we see similar overall trends between all of the participants. Most channels are located in regions related to movement and somatosensory information such as the precentral gyrus (prec.) and the postcentral gyrus (postc.). Similarly to the first task, participant s6 has areas linked very directly to hand movement, while participants s11 and s12 have activity in areas that are more related to self awareness and self perception (ex: sf. and ins.). This could explain a potential difference in interpretability of their data since they are much less directly linked to hand movement.
+
+The number of responsive channels is quite different between participants and between the two tasks. The responsive channels are different in terms of location. We find some similarities but no clear pattern.
+
+TODO?
 
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
@@ -274,6 +309,7 @@ The participants were asked to keep their hands on the resting positions. The le
         prec. & precentral gyrus \\
         rmf. & rostral middle frontal \\
         sf. & superior frontal \\
+        spm. & supramarginal \\
         WMpara. & White Matter paracentral \\
         \hline
     \end{tabular}
