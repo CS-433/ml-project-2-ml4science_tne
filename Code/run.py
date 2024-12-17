@@ -10,7 +10,19 @@ from sklearn.metrics import accuracy_score
 from dataset import Participant
 from torch.utils.data import DataLoader
 
-random.seed(RANDOM_STATE)
+# Reproducibility
+seed_num = RANDOM_STATE # This seed will be used for all random number generators
+torch.use_deterministic_algorithms(True) # PyTorch will use deterministic algorithms fro operations with stochastic behavior like dropout
+random.seed(seed_num) # Python's random will use seed_num
+np.random.seed(seed_num) # NumPy's random number generator will use seed_num
+torch.manual_seed(seed_num) # PyTorch's random number will use seed_num
+def seed_worker(worker_id): # Seed synchronized on all parallel works
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
+g = torch.Generator() # Creates an instance of PyTorch's random number generator
+g.manual_seed(seed_num) # Set PyTorch generator g to seed_num
+
 TEST_SIZE = 0.3
 PCA_EXPL_VAR = 0.95
 
@@ -35,12 +47,12 @@ def run_models(accuracies, features):
     logreg = LogisticRegressionModel()
     logreg.fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    accuracies['lr'].append(accuracy_score(y_test, y_pred))
+    accuracies['LR'].append(accuracy_score(y_test, y_pred))
     
     logreg = LogisticRegressionModel(use_pca=True, expl_var=PCA_EXPL_VAR)
     logreg.fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    accuracies['lr PCA'].append(accuracy_score(y_test, y_pred))
+    accuracies['LR PCA'].append(accuracy_score(y_test, y_pred))
     
     svm = SVMModel()
     svm.fit(X_train, y_train)
@@ -55,7 +67,7 @@ def run_models(accuracies, features):
     svm = RandomForestModel()
     svm.fit(X_train, y_train)
     y_pred = svm.predict(X_test)
-    accuracies['rf'].append(accuracy_score(y_test, y_pred))
+    accuracies['RF'].append(accuracy_score(y_test, y_pred))
     
     X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=TEST_SIZE, random_state=RANDOM_STATE)
     scaler = StandardScaler()
@@ -158,12 +170,16 @@ def plot_accuracy(accuracies, title, task, font_loc='best'):
     plt.savefig(f'figures/accuracies_across_part_{task}.png')
 
 
-# load.py needs to be run before this script
+
 if __name__ == '__main__':
     
-    accuracies_ExObs = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
-    accuracies_ex = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
-    accuracies_obs = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
+    # load.py needs to be run before this script
+    for part_name in PARTICIPANTS:
+        if not os.path.exists(f'saved/{part_name}.pkl'): raise FileNotFoundError(f'Participant {part_name} not found - Run load.py first')
+    
+    accuracies_ExObs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
+    accuracies_ex = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
+    accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
 
     for part_name in PARTICIPANTS:
         participant = Participant.load_from_pickle(f'saved/{part_name}.pkl')
