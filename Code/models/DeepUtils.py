@@ -16,8 +16,6 @@ class Trainer():
         self.device = device
 
     def train(self, train_loader, val_loader, verbose=True):
-        valid_loss_min = np.Inf
-
         for epoch in range(self.epochs):
             train_loss = 0.0
             valid_loss = 0.0
@@ -59,12 +57,7 @@ class Trainer():
             if verbose:    
                 print(f'Epoch: {epoch+1} \tValidation Loss: {valid_loss:.6f} \tValidation Acc: {valid_acc:.6f}')
             
-            if valid_loss <= valid_loss_min:
-                if verbose:
-                    print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model...'.format(valid_loss_min, valid_loss))
-                torch.save(self.model.state_dict(), self.save_path)
-                valid_loss_min = valid_loss
-
+        torch.save(self.model.state_dict(), self.save_path)
         return valid_loss
 
 class DfDataset(torch.utils.data.Dataset):
