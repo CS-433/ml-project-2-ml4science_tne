@@ -147,7 +147,7 @@ Random Forest (RF) classifiers combine the output of multiple decision trees to 
 \paragraph{MLP}
 In addition to traditional ML models, we also train Multilayer Perceptron (MLP) models. We chose to include MLP as it is widely used in EEG classification\footnote{3'610 results for 'EEG MLP classification' on Google Scholar in 2024 at the time of writing}. The main issue with MLP is that they are universal approximators and are thus prone to overfitting, especially for datasets as small as ours.
 
-We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly include
+We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay directly during the parameter update, leading to more consistent regularization and better generalization.
 
 \subsection{Results}
 We tested all models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
