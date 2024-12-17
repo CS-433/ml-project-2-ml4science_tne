@@ -47,12 +47,12 @@ def run_models(accuracies, features):
     logreg = LogisticRegressionModel()
     logreg.fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    accuracies['lr'].append(accuracy_score(y_test, y_pred))
+    accuracies['LR'].append(accuracy_score(y_test, y_pred))
     
     logreg = LogisticRegressionModel(use_pca=True, expl_var=PCA_EXPL_VAR)
     logreg.fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    accuracies['lr PCA'].append(accuracy_score(y_test, y_pred))
+    accuracies['LR PCA'].append(accuracy_score(y_test, y_pred))
     
     svm = SVMModel()
     svm.fit(X_train, y_train)
@@ -67,7 +67,7 @@ def run_models(accuracies, features):
     svm = RandomForestModel()
     svm.fit(X_train, y_train)
     y_pred = svm.predict(X_test)
-    accuracies['rf'].append(accuracy_score(y_test, y_pred))
+    accuracies['RF'].append(accuracy_score(y_test, y_pred))
     
     X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=TEST_SIZE, random_state=RANDOM_STATE)
     scaler = StandardScaler()
@@ -177,9 +177,9 @@ if __name__ == '__main__':
     for part_name in PARTICIPANTS:
         if not os.path.exists(f'saved/{part_name}.pkl'): raise FileNotFoundError(f'Participant {part_name} not found - Run load.py first')
     
-    accuracies_ExObs = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
-    accuracies_ex = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
-    accuracies_obs = {'lr': [], 'lr PCA': [], 'SVM': [], 'SVM PCA': [], 'rf': [], 'MLP': []}
+    accuracies_ExObs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
+    accuracies_ex = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
+    accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
 
     for part_name in PARTICIPANTS:
         participant = Participant.load_from_pickle(f'saved/{part_name}.pkl')
