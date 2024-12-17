@@ -4,6 +4,13 @@ import numpy as np
 
 class MLP(nn.Module):
     def __init__(self, input_size, n_classes, layers=(16, 8)):
+        """Create an MLP model.
+
+        Args:
+            input_size (int): number of features per datapoint.
+            n_classes (int): number of output classes.
+            layers (tuple, optional): tuple with the number of neurons per layer. Defaults to (16, 8).
+        """
         super().__init__()
 
         # Dynamically creates sequential layers
@@ -19,12 +26,38 @@ class MLP(nn.Module):
 
 
     def forward(self, x):
+        """Forward pass through the model.
+
+        Args:
+            x (Tensor): input tensor.
+
+        Returns:
+            Tensor: model's logits
+        """
         return self.model(x)
 
 class CNN1D(nn.Module):
     def __init__(self, input_channels, n_classes, length, channels=(8, 8, 16),
                  layers=(64, 32), paddings=(1, 1, 1), convkernels=(3, 3, 3), strides=(1, 1, 1),
                  maxpoolkernels=(2, 2, 2)):
+        """Create a 1D CNN model.
+
+        Args:
+            input_channels (int): number of channels in input
+            n_classes (int): number of output classes.
+            length (int): length of the input timeserie.
+            channels (tuple, optional): number of channels per convolutional layer.
+            Defaults to (8, 8, 16).
+            layers (tuple, optional): number of linear layer in the MLP. Defaults to (64, 32).
+            paddings (tuple, optional): size of the padding per convolutional layer.
+            Defaults to (1, 1, 1).
+            convkernels (tuple, optional): size of the convolution kernel (1D) per convolutional layer.
+            Defaults to (3, 3, 3).
+            strides (tuple, optional): size of the stride per convolutional layer.
+            Defaults to (1, 1, 1).
+            maxpoolkernels (tuple, optional): size of the maxpool kernel per convolutional layer.
+            Defaults to (2, 2, 2).
+        """
         super().__init__()
 
         self.convolution = nn.Sequential(*[
@@ -55,6 +88,14 @@ class CNN1D(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass through the model.
+
+        Args:
+            x (Tensor): input tensor.
+
+        Returns:
+            Tensor: model's logits
+        """
         x = self.convolution(x)
         x = x.reshape(x.shape[0], -1)
         return self.fc(x)
@@ -63,6 +104,24 @@ class CNN2D(nn.Module):
     def __init__(self, input_channels, n_classes, height, width, channels=(8, 8, 16),
                  layers=(64, 32), paddings=(1, 1, 1), convkernels=(3, 3, 3), strides=(1, 1, 1),
                  maxpoolkernels=(2, 2, 2)):
+        """Create a 2D CNN model.
+
+        Args:
+            input_channels (int): number of channels in input
+            n_classes (int): number of output classes.
+            length (int): length of the input timeserie.
+            channels (tuple, optional): number of channels per convolutional layer.
+            Defaults to (8, 8, 16).
+            layers (tuple, optional): number of linear layer in the MLP. Defaults to (64, 32).
+            paddings (tuple, optional): size of the padding per convolutional layer.
+            Defaults to (1, 1, 1).
+            convkernels (tuple, optional): size of the convolution kernel (2D) per convolutional layer.
+            If given a single number per layer, results in a square kernel. Defaults to (3, 3, 3).
+            strides (tuple, optional): size of the stride per convolutional layer.
+            Defaults to (1, 1, 1).
+            maxpoolkernels (tuple, optional): size of the maxpool kernel per convolutional layer.
+            Defaults to (2, 2, 2).
+        """
         super().__init__()
         assert len(channels) == len(maxpoolkernels) == len(strides) == len(paddings) == len(convkernels)
 
@@ -94,6 +153,14 @@ class CNN2D(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass through the model.
+
+        Args:
+            x (Tensor): input tensor.
+
+        Returns:
+            Tensor: model's logits
+        """
         x = self.convolution(x)
         x = x.reshape(x.shape[0], -1)
         return self.fc(x)
