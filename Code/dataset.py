@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt 
 from tqdm import tqdm
-from scipy.signal import resample, hilbert, welch, correlate, iirnotch, filtfilt
+from scipy.signal import resample, butter, sosfiltfilt, hilbert, welch, correlate, iirnotch, filtfilt
 from scipy.stats import ttest_rel
 
 from utils import *
@@ -11,6 +11,14 @@ from constants import *
 
 class Participant:
     def __init__(self, name, data_path=DATA_PATH, alpha=ALPHA):
+        """Create a Participant object using the dictionary at the given path.
+
+        Args:
+            name (str): name of the Participant
+            data_path (str, optional): path to the dictionary. Defaults to DATA_PATH.
+            alpha (float, optional): p-value threshold when using t-test to consider which channel
+            are responsive. Defaults to ALPHA.
+        """
         self.name = name
         data = load_pickle(data_path)
         self.sessions = [
@@ -38,35 +46,107 @@ class Participant:
             key=lambda channel: channel.p_value_Ex
         )
         self.relevant_channels_both = sorted(
-            [channel for channel in self.relevant_channels_obs if channel in self.relevant_channels_ex],
-            key=lambda channel: channel.p_value_Obs + channel.p_value_Ex
+            [channel for channel in self.relevant_channels_ex if channel in self.relevant_channels_obs],
+            key=lambda channel: channel.p_value_Ex + channel.p_value_Obs
         )
 
     @staticmethod
     def load_from_pickle(data_path):
+        """Load a participant from a pickle file.
+
+        Args:
+            data_path (str): path to the pickle file
+
+        Returns:
+            Participant: an instance of Participant, loaded from the pickle file.
+        """
         return pickle.load(open(data_path, 'rb'))
 
-    def _get_features_per_session_ExObs(self, session, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def _get_features_per_session_ExObs(self, session, channels='all', freq_band=FREQ_BANDS,
+                                        features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        """Computes the features of all trials in a given session for the Action Recognition task.
+
+        Args:
+            session (Session): session from which to compute the features for all trials.
+            channels (str | list, optional): list of indices of channels to use to compute features.
+            Defaults to 'all'.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+
+        Returns:
+            tuple(list, pd.DataFrame): a tuple containing the labels of the trials and a DataFrame
+            containing the features for the trials.
+        """
+        relevant_channels = self.relevant_channels_both
+        if channels != 'all':
+            relevant_channels = [channel for i, channel in enumerate(self.relevant_channels_both) if i in channels]
         trial_dict = {}
         labels = []
         for trial in tqdm(session.trials):
             labels.append(trial.action_type)
-            trial_dict = self.get_features(trial_dict, trial, self.relevant_channels_both, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size)
                                        
         return labels, pd.DataFrame(trial_dict)
 
-    def get_features_all_sessions_ExObs(self, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_ExObs(self, channels='all', freq_band=FREQ_BANDS, features=FEATURES,
+                                        window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        """Compute the features for all sessions for the Action Recognition task.
+
+        Args:
+            channels (str | list, optional): list of indices of channels to use to compute features.
+            Defaults to 'all'.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+
+        Returns:
+            pd.DataFrame: DataFrame containing all the features for all sessions, with the labels as
+            last column.
+        """
+        assert channels == 'all' or type(channels) == list, 'The channels parameter should be either "all" or a list of channel indices'
         all_labels = []
         all_features = []
         for session in self.sessions:
-            labels, features = self._get_features_per_session_ExObs(session, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_ExObs(session, channels, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
         
-    def _get_features_per_session_mvt(self, session, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def _get_features_per_session_mvt(self, session, movtype, channels='all', freq_band=FREQ_BANDS,
+                                      features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        """Computes the features of all trials in a given session for the Movement Recognition tasks,
+        depending on the value of ``movtype``.
+
+        Args:
+            session (Session): session from which to compute the features for all trials.
+            movtype (str): type of movement in consideration. Must be either 'E' for execution or
+            'O' for observation.
+            channels (str | list, optional): list of indices of channels to use to compute features.
+            Defaults to 'all'.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+
+        Returns:
+            tuple(list, pd.DataFrame): a tuple containing the labels of the trials and a DataFrame
+            containing the features for the trials.
+        """
+        assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
         relevant_channels = self.relevant_channels_ex if movtype == 'E' else self.relevant_channels_obs
         if channels != 'all':
             relevant_channels = [channel for i, channel in enumerate(relevant_channels) if i in channels]
@@ -79,43 +159,121 @@ class Participant:
                                        
         return labels, pd.DataFrame(trial_dict)
     
-    def get_features_all_sessions_mvt(self, movtype, channels='all', freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_mvt(self, movtype, channels='all', freq_band=FREQ_BANDS,
+                                      features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        """Compute the features for all sessions for the Movement Recognition task.
+
+        Args:
+            movtype (str): type of movement in consideration. Must be either 'E' for execution or
+            'O' for observation.
+            channels (str | list, optional): list of indices of channels to use to compute features.
+            Defaults to 'all'.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+
+        Returns:
+            pd.DataFrame: DataFrame containing all the features for all sessions, with the labels as
+            last column.
+        """
         assert movtype == 'E' or movtype == 'O', 'The type of movement should be either E (for Ex) or O (for Obs)'
         assert channels == 'all' or type(channels) == list, 'The channels parameter should be either "all" or a list of channel indices'
         all_labels = []
         all_features = []
         for session in self.sessions:
-            labels, features = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_mvt(session, movtype, channels, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
     
-    def _get_features_per_session_rnd(self, session, nb_channels, movtype=None, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
-        channels = random.sample(self.channels, nb_channels)
+    def _get_features_per_session_unresponsive(self, session, random_channels, movtype=None,
+                                               freq_band=FREQ_BANDS, features=FEATURES,
+                                               window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+        """Computes the baseline features of all trials in a given session for the Movement
+        Recognition task, depending on the value of ``movtype``.
+
+        Args:
+            session (Session): session from which to compute the features for all trials.
+            random_channels (list): list of unresponsive channels to use to compute the features.
+            movtype (str): type of movement in consideration. Must be either 'E' for execution or
+            'O' for observation.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+
+        Returns:
+            tuple(list, pd.DataFrame): a tuple containing the labels of the trials and a DataFrame
+            containing the features for the trials.
+        """
         trial_dict = {}
         labels = []
         for trial in tqdm(session.trials):
             if movtype != None and trial.action_type != movtype: continue
             labels.append(trial.object_size)
-            trial_dict = self.get_features(trial_dict, trial, channels, freq_band, features, window_size, step_size)
+            trial_dict = self.get_features(trial_dict, trial, random_channels, freq_band, features, window_size, step_size)
 
         return labels, pd.DataFrame(trial_dict)
     
-    def get_features_all_sessions_rnd(self, nb_channels, movtype, freq_band=FREQ_BANDS, features=FEATURES, window_size=WINDOW_SIZE, step_size=STEP_SIZE):
+    def get_features_all_sessions_unresponsive(self, movtype, freq_band=FREQ_BANDS, features=FEATURES,
+                                               window_size=WINDOW_SIZE, step_size=STEP_SIZE, alpha=ALPHA):
+        """Compute the features for all sessions using unresponsive channels.
+
+        Args:
+            movtype (str): type of movement in consideration. Must be either 'E' for execution or
+            'O' for observation.
+            freq_band (dict, optional): dictionary of frequency band. Defaults to FREQ_BANDS.
+            features (list, optional): list of features to compute. The features are provided as
+            function directly. Defaults to FEATURES.
+            window_size (int, optional): size of the window used to compute the features.
+            Defaults to WINDOW_SIZE.
+            step_size (int, optional): step size of the window used to compute the features.
+            Defaults to STEP_SIZE.
+            alpha (float, optional): p-value threshold when using t-test to consider which channel
+            are (un)responsive. Defaults to ALPHA.
+
+        Returns:
+            pd.DataFrame: DataFrame containing all the features for all sessions, with the labels as
+            last column.
+        """
         assert movtype is None or movtype == 'E' or movtype == 'O', 'If present (not None), the type of movement should be either E (for Ex) or O (for Obs)'
         all_labels = []
         all_features = []
+        unresponsive_channels = [channel for channel in self.channels if channel.p_value_Ex > alpha]
         for session in self.sessions:
-            labels, features = self._get_features_per_session_rnd(session, nb_channels, movtype, freq_band, features, window_size, step_size)
+            labels, features_session = self._get_features_per_session_unresponsive(session, unresponsive_channels, movtype, freq_band, features, window_size, step_size)
             all_labels.extend(labels)
-            all_features.append(features)
+            all_features.append(features_session)
         all_features = pd.concat(all_features)
         all_features['label'] = all_labels
         return all_features
     
-    def get_features(self, trial_dict, trial, relevant_channels, freq_band, features, window_size, step_size):
+    def get_features(self, trial_dict, trial, relevant_channels, freq_band, features, window_size,
+                     step_size):
+        """Compute the features for a single trial.
+
+        Args:
+            trial_dict (dict): dictionary recording the features for all trials, given as reference.
+            trial (Trial): Trial object containing the information for a single trial.
+            relevant_channels (list): list of Channel objects representing the channels to use.
+            freq_band (dict): dictionary of frequency band.
+            features (list): list of features to compute. The features are provided as function
+            directly.
+            window_size (int): size of the window used to compute the features.
+            step_size (int): step size of the window used to compute the features.
+
+        Returns:
+            dictionary: the updated dictionary recording the features for all trials.
+        """
         for channel in relevant_channels:
             for band_name, (low, high) in freq_band.items():
                 signal = trial.get_preprocessed_signal(channel, low, high)
@@ -131,6 +289,12 @@ class Participant:
         return trial_dict
     
     def plot_channel_responsiveness(self, dB=True):
+        """Utility function to plot the PSDs of channels' baselines and effects (1s around the moment
+        the object is grasped).
+
+        Args:
+            dB (bool, optional): whether the y-axis is in dB scale. Defaults to True.
+        """
         num_cols = 4
         fig_width = 20
         num_rows = int(np.ceil(self.nb_channels / num_cols))
@@ -170,6 +334,12 @@ class Participant:
         plt.show()
         
     def plot_preprocessed_signal(self, trial=None):
+        """Utility function to plot the preprocessed signals of channels.
+
+        Args:
+            trial (Trial, optional): specific trial to use. Defaults to None, meaning the function
+            uses the first trial of the first session.
+        """
         num_cols = len(FREQ_BANDS)
         fig_width = 20
         num_rows = int(len(self.relevant_channels))
@@ -191,11 +361,20 @@ class Participant:
         
 class Channel:
     def __init__(self, name, idx, location, participant, sessions):
+        """Create a Channel object. A channel corresponds to a specific electrode in the brain.
+
+        Args:
+            name (str): label of the channel.
+            idx (str): index of the channel.
+            location (str): location, as brain region, of the channel.
+            participant (str): name of the participant to which the channel belongs to.
+            sessions (list): list of Session objects corresponding to all sessions of the participant.
+        """
         self.name = name
         self.idx = idx
         self.location = location
         self.participant = participant
-        
+
         pds_baseline_Ex = []
         pds_aroundObjGrasped_Ex = []
         
@@ -227,6 +406,15 @@ class Channel:
     
 class Session: 
     def __init__(self, name, fs, neural_data, trials_info):
+        """Create a Session object. A session corresponds to a specific recording session of a
+        participant.
+
+        Args:
+            name (str): name of the session.
+            fs (int): sampling frequency for the whole session (Hz).
+            neural_data (ndarray): array containing the neural recordings.
+            trials_info (dict): dictionary containing information about the session.
+        """
         self.name = name
         self.fs = fs
         self.neural_data = neural_data
@@ -242,6 +430,15 @@ class Session:
         
 class Trial: 
     def __init__(self, trial_idx, fs, neural_data, trials_info):
+        """Create a Trial object. A trial corresponds to a specific trial of a session. Can be either
+        an execution trial, or an observation trial.
+
+        Args:
+            trial_idx (int): index of the trial.
+            fs (int): sampling frequency for the trial (Hz).
+            neural_data (ndarray): array containing the neural recordings.
+            trials_info (dict): dictionary containing information about the session for this trial.
+        """
         trial_baseline_start = trials_info['TS_TrialStart'][trial_idx]
         trial_baseline_stop = trials_info['TS_CueOn'][trial_idx]
         self.trial_start = trials_info['TS_TrialStart'][trial_idx]
@@ -264,16 +461,43 @@ class Trial:
         self.baseline_signal = baseline
         
     def get_mean_baseline(self):
+        """Computes the mean of the baseline signal.
+
+        Returns:
+            float: mean of the baseline signal.
+        """
         return np.mean(self.baseline_signal, axis=1)
     
     def get_std_baseline(self):
+        """Computes the standard deviation of the baseline signal.
+
+        Returns:
+            float: the standard deviation of the baseline signal.
+        """
         return np.std(self.baseline_signal, axis=1)
-    
-    def get_subsampled_baseline(self, subsampling_frequency=SUBSAMPLING_FREQUENCY):
-        return subsample(self.baseline_signal, self.fs, subsampling_frequency)
     
     def get_signal(self, trigger_start='TS_HandOut', trigger_stop='TS_HandBack',
                    subsampling_frequency=SUBSAMPLING_FREQUENCY, baseline_correction=True, nb_samples=NB_SAMPLES):
+        """Preprocess the signal of a trial.
+
+        Args:
+            trigger_start (str, optional): name of the start trigger (the instant we start considering
+            the signal as a specific trial). Defaults to 'TS_HandOut'.
+            trigger_stop (str, optional): name of the stop trigger (the instant we stop considering
+            the signal as a specific trial). Defaults to 'TS_HandBack'.
+            subsampling_frequency (int, optional): subsampling frequency (Hz).
+            Defaults to SUBSAMPLING_FREQUENCY.
+            baseline_correction (bool, optional): whether to perform baseline Z-score normalization.
+            Defaults to True.
+            nb_samples (int, optional): number of samples to resample the signal, so that each trial
+            has the same number of samples. Defaults to NB_SAMPLES.
+
+        Raises:
+            ValueError: if any of the trigger is not a valid key in the trials_info dictionary.
+
+        Returns:
+            ndarray: the preprocessed signal of the trial.
+        """
         
         if trigger_start not in self.trials_info.keys() or trigger_stop not in self.trials_info.keys():
             raise ValueError('Invalid trigger')
@@ -294,6 +518,16 @@ class Trial:
         return signal
     
     def get_preprocessed_signal(self, channel, low, high):
+        """Bandpass the signal of a channel and creates an enveloppe of it.
+
+        Args:
+            channel (Channel): channel for which to create the enveloppe.
+            low (int): low cutoff frequency for the bandpass filter (Hz).
+            high (int): high cutoff frequency for the bandpass filter (Hz).
+
+        Returns:
+            ndarray: bandpassed and envelopped signal of the channel.
+        """
         signal = self.get_signal()[channel.idx]
         signal = bandpass_filter(signal, low, high, self.fs)
         signal = hilbert(signal)
@@ -301,6 +535,14 @@ class Trial:
         return signal
     
     def get_pds_baseline(self, channel_idx):
+        """Compute the power spectral density (PSD) of the baseline signal.
+
+        Args:
+            channel_idx (int): index of the channel for which to compute the PSD.
+
+        Returns:
+            list: list of ndarray obtained by the Welch method.
+        """
         return welch(self.baseline_signal[channel_idx], fs=self.fs, nperseg=self.fs/2)
     
     def get_pds_aroundObjGrasped(self, channel_idx):
@@ -310,6 +552,16 @@ class Trial:
         return welch(self.signal[channel_idx, start_idx:stop_idx], fs=self.fs, nperseg=self.fs/2)
     
 def subsample(signal, fs, subsampling_frequency):
+    """Subsample the given signal at the given subsampling frequency.
+
+    Args:
+        signal (ndarray): signal to subsample.
+        fs (int): original sampling frequency (Hz).
+        subsampling_frequency (int): subsampling frequency (Hz).
+
+    Returns:
+        ndarray: subsampled signal.
+    """
     step = fs // subsampling_frequency
     return signal[:, ::step]
 
@@ -318,14 +570,14 @@ def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     Apply a bandpass filter to the input signal.
 
     Args:
-        signal (ndarray): (nb_channels, nb_timepoints) NumPy array, the signal to filter.
+        signal (ndarray): signal to filter.
         lowcut (float): lower frequency of the band (Hz).
         highcut (float): higher frequency of the band (Hz).
         fs (float): sampling frequency of the signal (Hz). 
         order (int, optional): the order of the filter. Defaults to 4.
 
     Returns:
-        filtered_data (ndarray): (nb_channels, nb_timepoints) NumPy array, the filtered signal.
+        ndarray: (nb_channels, nb_timepoints) NumPy array, the filtered signal.
     """
     if lowcut >= highcut:
         raise ValueError("Lowcut frequency must be less than highcut frequency.")
@@ -337,6 +589,17 @@ def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     return sosfiltfilt(sos, signal)
 
 def noise_filter(signal, fs, nb_harmonics=2):
+    """Remove power grid noise from the input signal.
+
+    Args:
+        signal (ndarray): signal
+        fs (int): original sampling frequency (Hz).
+        nb_harmonics (int, optional): number of harmonics of the power grid signal to consider.
+        Defaults to 2.
+
+    Returns:
+        ndarray: signal with power grid noise removed.
+    """
     # removing 50Hz noise and its harmonics
     powergrid_noise_frequencies_Hz = [harmonic_idx*50 for harmonic_idx in range(1, nb_harmonics+1)] 
 
@@ -348,7 +611,7 @@ def noise_filter(signal, fs, nb_harmonics=2):
 
 
 if __name__ == '__main__':
-    p = Participant('s6')
+    p = Participant('s12')
     # df = p.get_features_all_sessions_ExObs()
     df = p.get_features_all_sessions_mvt(movtype='E')
     

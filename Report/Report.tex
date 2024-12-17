@@ -5,52 +5,72 @@
 \usepackage{amsmath}
 \usepackage{placeins}
 
+\renewcommand{\sectionautorefname}{Section}
+
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd{\@makecaption}
+  {\scshape}
+  {}
+  {}
+  {}
+\makeatother
+
+\newcommand{\aref}[1]{\hyperref[#1]{Appendix~\ref*{#1}}}
+
 \begin{document}
-\title{ML Project 2 - Report}
+\title{Investigating classifiers to decode execution and observation processes from intracranial signals}
 
 \author{
-  Sarah Mikami, Samuel Waridel and Florian Kolly \\
-  \textit{CS433, EPFL 2024}
+  Kolly Florian, Mikami Sarah, Waridel Samuel \\
+  \textit{EPFL 2024 | CS433}
   \textit{ML4Science project | TNE Laboratory}
 }
 
 \maketitle
 
 \begin{abstract}
-
+    Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks: distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation. Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning approaches, can effectively classify actions based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the models fail to capture the subtle differences in brain activity and therefore achieve low performances. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
 \end{abstract}
 
 \section{Introduction}
-Machine Learning (ML) is has become a central tool in neuroscience, with applications in neural engineering (e.g. Brain-Computer Interfaces, BCIs), diagnostics and fundamental research. For instance, Jalilifard et al. \cite{EmotionClassificationSVM} demonstrated the efficacy of Support Vector Machine (SVM) classifiers in basic emotions recognition, while Bose et al. \cite{EEGRandomForset} used Random Forest classifiers to automate seizure detection in epileptic patients with high accuracy. Indeed, all major ML methods have been applied to neural signals classification\cite{EEGMLReview}.
+Machine Learning (ML) is has become a central tool in neuroscience, with applications in neural engineering (e.g. Brain-Computer Interfaces, BCIs \cite{eegforbci}), diagnostics (see \cite{VIEIRA201758} for an overview) and fundamental research (such as the recent NeuroAI field). For instance, Jalilifard et al. \cite{EmotionClassificationSVM} demonstrated the efficacy of Support Vector Machine (SVM) classifiers in basic emotions recognition, while Bose et al. \cite{EEGRandomForset} used Random Forest classifiers to automate seizure detection in epileptic patients with high accuracy. Indeed, all major ML methods have been applied to neural signals classification\cite{EEGMLReview}.
 
-In this work, we examine the applications of such ML techniques in three classification problems using sEEG signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small versus a large object; iii) differentiating between observing the grasp of a small versus a large object.
+In this work, we examine the applications of supervised ML models in three classification problems using electroencephalography (EEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small object (precision grasp) versus a large object (power grasp); and iii) differentiating between observing the grasp of a small versus a large object. The sEEG data used here were previously collected from epileptic patients implanted with electrodes in various brain regions as part of their clinical treatment.
 
-Section \ref{sec:problem} outlines the data acquisition process and its relevance to our classification tasks. In Section \ref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. Sections \ref{sec:actionrecognition} and \ref{sec:objectrecognition} present the models applied to our classification problems and their performance. In Section \ref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) to directly extract features from the EEG signal. Finally, we discuss our results in Section \ref{sec:discussion} and conclude in Section \ref{sec:conclusion}.
+\autoref{sec:problem} outlines the data acquisition process and its relevance to our classification tasks. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the EEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
 
 \section{Data acquisition and problem specification}
 \label{sec:problem}
-The dataset comprises signals recorded from four participants, each implanted with sEEG electrodes in distinct brain regions. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (force-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions.
+The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
 
 \begin{figure}[h!]
   \center
   \includegraphics[width=\linewidth]{images/2024-12-11-13-41-48.png}
-  \caption{Timing of the trials}
+  \caption{Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation)}
 \end{figure}
 \FloatBarrier
 
 \section{Data analysis}
 \label{sec:analysis}
+In this section, we describe the preprocessing and analysis of the data. The dataset is a dictionary containing four subjects (named \textit{s6}, \textit{s7}, \textit{s11} and \textit{s12}). Each subject participated to a number of sessions, ranging from only one session (subjects \textit{s6} and \textit{s7}) up to three (subject \textit{s11}). During each sessions, the subjects completed 256 tasks, equally distributed as observation or execution tasks. The number and location of the channels are not identical across subjects, as they were previously implanted.
 
 \subsection{Channel responsiveness}
-Which regions have the most responsive channels, are they the same for ex \& obs?
+We first filtered the channels of interest: for a given channel and task, we define i) the \textit{baseline signal} as the average signal across all task-specific trials in the one-second window between the start of the trial (1) and the cue light turning on (2), and ii) the \textit{effect signal} as the average signal across all task-specific trials in the one-second equally spaced window surrounding the moment the object is grasped (6), whether by the subject or the experimenter. Using Welch's method\cite{welch}, we computed the power spectral density (PSD) for both the \textit{baseline signal} and the \textit{effect signal}. We then performed a t-test to compare the PSDs and define a \textit{responsive channel} as a channel with a statistically significative t-test (\(\alpha<0.05\), hyperparameter). This analysis was conducted separately for channels responsive during observation trials, execution trials, and responsive to both. As channels vary across subjects, the preprocessing was conducted individually for each subject.
 
-\begin{itemize}
-    \item Across participant: same region? same nb of responsive channels?
-    \item Are the channels responsive for obs also responsive for ex? Vice-versa?
-    \item Do we find the expected regions? Link to mvt execution / observation?
-\end{itemize}
+\subsection{Data preprocessing}
+\label{subsec:preproc}
+The signals (one per channel) of each trial is preprocessed in three steps:
+\begin{enumerate}
+  \item \textbf{Subsampling}: the signal is subsampled from 2048 Hz to 500 Hz to reduce the computational needs. Since the EEG data contains information up to approximatively 150 Hz, this subsampling respects the Nyquist criterion.
+  \item \textbf{Z-score correction}: Each EEG signal is normalized with Z-score normalization, calculated using the mean and standard deviation of the \textit{baseline signal}.
+  \item \textbf{Resampling}: finally, all trials are resampled to ensure they contain the same number of timepoints.
+\end{enumerate}
 
-For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
+\subsection{Feature extraction}
+TODO SARAH
+
+Talk especially about the idea of frequency range! A plot would be nice.
 
 \begin{itemize}
     \item Amplitude, shape of response \(\to\) difference?
@@ -60,52 +80,176 @@ For channels where we have response for both ex \& obs, are the responses congru
     \item Are the results obtained similar for both movements?
 \end{itemize}
 
-
 \section{Action recognition}
 \label{sec:actionrecognition}
-Do it for each participants
+In this first classification task, we train and optimize different family of ML models to predict whether the participant was executing the movement or observing it. The analysis is restricted to channels responsive to both movements. Given the distinct nature of the tasks being compared, we anticipate strong performance across all models.
+
+\subsection{Responsivity of channels}
+The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the \(\alpha\) value of the t-test. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels.
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=0.8\linewidth]{images/2560px-Human-brain.SVG.png}
+    \caption{Locations of the ten most responsive channels in participant \textit{s6}: the number in parenthesis is the number of top-10 channels in this region. Edited from Hugh Guiney, CC BY-SA 3.0 \url{https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}
+    \label{fig:s6actionrecogchannels}
+\end{figure}
+\FloatBarrier
+TODO: SAMUEL picture above is not correct anymore!
+
+For this participant, the ten most responsive regions were respectively in the precentral gyrus (6), the supramarginal gyrus (2), the postcentral gyrus (1) and the caudal middle frontal gyrus (1), over a total of 68 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c |}
+        \hline
+        Part. & \# channels & Main locations (\# channels) \\
+        \hline
+        \textit{s6} & 40 & Prec. (5), postc. (5) \\
+        \hline
+        \textit{s7} & 48 & Prec. (7), postc. (1), cmf. (1), parso. (1) \\
+        \hline
+        \textit{s11} & 27 & Prec. (1),  rmf. (1), sf. (5), WMpara. (2), para. (1) \\
+        \hline
+        \textit{s12} & 61 & Ins. (4), sp. (1), pc. (2), para. (1), postc. (2) \\
+        \hline
+    \end{tabular}
+    \caption{Number of responsive channels in total and location of the ten most responsive per participant. \aref{tab:acronyms} contains the list of acronyms}
+    \label{tab:actionrecogchannellocations}
+\end{table}
+
+We see that the regions with the most importance are similar across participants.
+
+\begin{itemize}
+    \item Across participant: same region? same nb of responsive channels?
+    \item Do we find the expected regions? Link to mvt execution / observation?
+\end{itemize}
+
+For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
+
+\subsection{Analysis of frequency bands}
+TODO SARAH
+
+\subsection{Baseline data}
+In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive to this measure, and computed features from them. We will run each model on both sets of data, and a comparison will be done in the results.
 
 \subsection{Models}
-\paragraph{SVM}
-\paragraph{Random forest}
-\paragraph{MLP}
-\subsection{Results}
-\subsection{Discussion}
-Which freq. bands are important? Is it the same across subjects?
+To create and train the logistic regression, SVM and random forest models, we adopted the well-known and performant Scikit-Learn library \cite{scikitlearn}. The Deep Learning models are developed using the PyTorch library \cite{pytorch}. We selected models based on the literature available on EEG analysis.
 
-\section{Object recognition}
+\paragraph{Logistic regression}
+Logistic regression (LR) is a computationally simple ML technique, and has previously used in EEG classification\cite{SUBASI200587, NIPS2006_35937e34}.
+
+\paragraph{SVM}
+We train two Singular Vector Machines (SVM) models, with and without PCA. SVM can handle high dimensional data, even for small datasets. Although more computationally than other methods, it is widely used in EEG classification with good results \cite{knn_svm_review}.
+
+\paragraph{Random forest}
+Random Forest (RF) classifiers combine the output of multiple decision trees to reach a single result. Frequently used with a lower set of carefully crafted features (e.g. in \cite{eegrfclassif} with 11 features), we hypothesize that this family can also have interesting results here.
+
+\paragraph{MLP}
+In addition to traditional ML models, we also train Multilayer Perceptron (MLP) models. We chose to include MLP as it is widely used in EEG classification\footnote{3'610 results for 'EEG MLP classification' on Google Scholar in 2024 at the time of writing}. The main issue with MLP is that they are universal approximators and are thus prone to overfitting, especially for datasets as small as ours.
+
+We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly include
+
+\subsection{Results}
+We tested all models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
+
+\begin{figure}[h!]
+  \center
+  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ExObs.png}
+  \caption{Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}
+\end{figure}
+\FloatBarrier
+
+\subsection{Discussion}
+As expected, we obtain very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain much stronger accuracies when given carefully crafted features.
+
+\section{Movement recognition}
 \label{sec:objectrecognition}
-Do it for each participants
+For the second and third type of classification tasks, we analyze whether ML tools are able to classify the type of movement done (precision grasp or power grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we reduce the restrictions to select the \textit{responsive channels}: it suffices for a channel to be responsive in execution or in observation respectfully to be included.
+
+\subsection{Responsive channels}
+TODO SAMUEL
+Which regions have the most responsive channels, are they the same for execution \& observation?
+
+\begin{itemize}
+    \item Across participant: same region? same nb of responsive channels?
+    \item Are the channels responsive for obs also responsive for ex? Vice-versa?
+    \item Do we find the expected regions? Link to mvt execution / observation?
+\end{itemize}
+
+For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
+
+\subsection{Analysis of frequency bands}
+TODO SARAH
 
 \subsection{Models}
-\paragraph{SVM}
-\paragraph{Random forest}
-\paragraph{MLP}
+We use the same families of model as in the previous part, and this for both classifying in execution tasks and in observation tasks.
 
 \subsection{Results}
+As expected, our results are significantly lower in those tasks than in the first part. We also observe a drop in performance between execution and observation.
+
+\paragraph{Execution trials}
+TODO FLORIAN
+The best model when classifying whether the subject has done a precision or power movement is ... TODO
+
+\begin{figure}[h!]
+  \center
+  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ex.png}
+  \caption{Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}
+\end{figure}
+\FloatBarrier
+
+\paragraph{Observation trials}
+TODO FLORIAN
+The best model when classifying whether the subject has seen a precision or power movement is ... TODO
+
+\begin{figure}[h!]
+  \center
+  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_obs.png}
+  \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
+\end{figure}
+\FloatBarrier
+
 \subsection{Discussion}
+TODO SARAH
 Which freq. bands are important? Is it the same across subjects?
 
 \section{Pure deep learning approach}
 \label{sec:deeplearning}
-Can a 1D conv. network learn relevant features for classification? Create and test model on trials themselves
+Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. It's this question that we explore in this last section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. The hope is that the convolutional layers manage to extract responsive features from the signal, giving it as input to the subsequent MLP. In this section, we are not focusing on performance and thus wont optimize models. Instead, we are attempting new techniques as proof of concept.
+
+\subsection{1D CNN}
+One-dimensional CNNs are composed of kernels that are convolved with the signal directly. As they operate on data in one dimension, the input will be a tensor of size \((N, C, L)\), where \(N\) is the batch size, \(C\) the number of (responsive) channels and \(L\) the fixed length of each trial. This is close to how we computed our features: supposing the same kernel size as the length of the moving averages we use to create features, we would get the same features if the network learned moving averages as well. Given this and the known power of CNNs, we expect this model to have the best performance. The caveat is overfitting, as we have small datasets.
+
+\subsection{2D CNN}
+Two-dimensional CNNs are composed of 2D kernels that will operate on multiple channels at the same time. This means that we give as input a tensor of dimensions \((N, C, H, W)\), with \(H\) the number of channels and \(W\) the length of each signal. The use of \(H\) and \(W\) as dimensions is not an arbitrary choice. Indeed, we can think of this superposition of channels as a picture, where each signal is a position on the \(y\)-axis and every timepoint a position on the \(x\)-axis. Here, \(C=1\) as this virtual picture is simply represented by nuances of grey.
+
+\subsection{Results}
+Surprisingly, both types of CNN achieve high performance on the action recognition task. However, their performance are unfortunately lacking in the two other movement recognition tasks. The results are however encouraging, and more work should be done on finding good CNNs for analysing such data.
 
 \section{Discussion}
 \label{sec:discussion}
+TODO ALL
 
 \section{Conclusion}
 \label{sec:conclusion}
+In this project, we used various classification models to analyze the classification accuracies of three distinct tasks. While every model was capable of classifying well the first, easiest, task, the performance dropped when the differences in brain signals were more subtle. Our work therefore shows that ML models can already successfully be applied to EEG signals without the need for handcrafted features, but they need clear differences in signal. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models.
 
-
+\newpage
 %%%%%%%%%% ETHICAL RISKS %%%%%%%%%%
 %% 200 to 400 words max., does not count in the 4-page limit
 \section{Ethical risks}
+It is clear that the analysis of EEG and other brain signals present a unique set of ethical challenges. Given that we are not sharing the dataset for privacy concern, we will focus on this ethical risk in this brief analysis. EEG signals reveal information not only about the physical health of a subject, but also mental states, emotions and cognitive functions. With the popularization of such tools, we risk losing a fundamental right to mental privacy. This is not only true for emotions, but also religious and political opinions. For instance, neuropolitics\cite{neuropolitics} is a whole field of research that wishes to find the neural roots of our political beliefs. Prediction is just a step further, step that already stated with work such as \cite{galli_early_2021} and \cite{yun_erp_2022}.
 
+As current methods require possible invasive electrodes, or to use expensive and complicated machines such as fMRI scanners, primarily patients ongoing clinical treatment and study subjects are affected by those risks at the moment. However, the potential violation of cognitive privacy underscores the need for robust privacy and anonymization measures when using EEG datasets. If not correctly established, third parties could gain valuable data on the private mental processes of a user and use it to their advantages. Companies such as Tesla or Meta already invested in such technologies, and not renowned for their privacy-oriented policies. The severity and ramifications of cognitive privacy violating in a large pool of user is hard to quantify, but without strict policies, the possibility of a future without private thought becomes alarmingly plausible.
 
+Even without speculating about future developments in brain signal analysis, EEG signals are already used in identifying individuals. For example, tools for User Authentication via EEG signals already exists\cite{10058960}. It is then clear that, when in possession of private EEG data, precautions must be taken to ensure that this data remains within the restricted pool of authorized researchers who have been granted access. In this project, we were careful not to upload this data on any online repository (e.g. GitHub), and we will not give the dataset to correctors outside the TNE laboratory. Moreover, we did not access any personal information from the participants involved.
 
+Advanced methods exist to encrypt data while allowing computations on it\cite{app11167360}. Unfortunately, the time and scope of this project did not permit the implementation of such technologies.
 
 %% Not in the 4-page limit
 \section{Appendix}
+\subsection{Experimental setup}
+The participants were asked to keep their hands on the resting positions. The led lights are used both to indicate who will realise the action and to specify which objects has to be grasped. A.) execution trial: the participant must pick the small green ball using a precise pinch grasp. B.) observation trial: the experimenter must pick the large red ball using a power grasp. C.) control action, not used in this project.
 
 \begin{figure}[h!]
     \center
@@ -114,6 +258,28 @@ Can a 1D conv. network learn relevant features for classification? Create and te
 \end{figure}
 \FloatBarrier
 
+\subsection{Acronyms}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | l |}
+        \hline
+        Acronym & Corresponding region \\
+        \hline
+        cmf. & caudal middle frontal gyrus \\
+        ins. & Insula \\
+        para. & paracentral \\
+        parso. & parsopercularis \\
+        pc. & posterior cingulate \\
+        postc. & postcentral gyrus \\
+        prec. & precentral gyrus \\
+        rmf. & rostral middle frontal \\
+        sf. & superior frontal \\
+        WMpara. & White Matter paracentral \\
+        \hline
+    \end{tabular}
+    \caption{List of acronyms for the brain regions}
+    \label{tab:acronyms}
+\end{table}
 
 % \begin{figure}[tbp]
 %   \centering
@@ -123,7 +289,6 @@ Can a 1D conv. network learn relevant features for classification? Create and te
 %   \label{fig:denoise-fourier}
 % \end{figure}
 
-
 \section*{Acknowledgements}
 We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
 
@@ -131,3 +296,5 @@ We thank Leonardo Pollina for taking us with him on this project, and for his qu
 \bibliography{ref}
 
 \end{document}
+
+% <a href="https://www.vecteezy.com/free-vector/brain-diagram">Brain Diagram Vectors by Vecteezy</a>
