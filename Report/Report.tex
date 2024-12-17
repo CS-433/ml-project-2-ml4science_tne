@@ -205,7 +205,7 @@ Which freq. bands are important? Is it the same across subjects?
 
 \section{Pure deep learning approach}
 \label{sec:deeplearning}
-Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. It's this question that we explore in this last section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. These networks contain several convolutional layers followed by linear layers. The hope is that the convolutional layers manage to extract responsive features from the signal, giving it as input to the subsequent MLP.
+Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. It's this question that we explore in this last section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. The hope is that the convolutional layers manage to extract responsive features from the signal, giving it as input to the subsequent MLP. In this section, we are not focusing on performance and thus wont optimize models. Instead, we are attempting new techniques as proof of concept.
 
 \subsection{1D CNN}
 One-dimensional CNNs are composed of kernels that are convolved with the signal directly. As they operate on data in one dimension, the input will be a tensor of size \((N, C, L)\), where \(N\) is the batch size, \(C\) the number of (responsive) channels and \(L\) the fixed length of each trial. This is close to how we computed our features: supposing the same kernel size as the length of the moving averages we use to create features, we would get the same features if the network learned moving averages as well. Given this and the known power of CNNs, we expect this model to have the best performance. The caveat is overfitting, as we have small datasets.
@@ -214,7 +214,7 @@ One-dimensional CNNs are composed of kernels that are convolved with the signal 
 Two-dimensional CNNs are composed of 2D kernels that will operate on multiple channels at the same time. This means that we give as input a tensor of dimensions \((N, C, H, W)\), with \(H\) the number of channels and \(W\) the length of each signal. The use of \(H\) and \(W\) as dimensions is not an arbitrary choice. Indeed, we can think of this superposition of channels as a picture, where each signal is a position on the \(y\)-axis and every timepoint a position on the \(x\)-axis. Here, \(C=1\) as this virtual picture is simply represented by nuances of grey.
 
 \subsection{Results}
-TODO: Both type of CNN works well.
+Surprisingly, both types of CNN achieve high performance on the action recognition task. However, their performance are unfortunately lacking in the two other movement recognition tasks. The results are however encouraging, and more work should be done on finding good CNNs for analysing such data.
 
 \section{Discussion}
 \label{sec:discussion}
