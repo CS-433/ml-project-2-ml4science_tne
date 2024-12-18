@@ -32,8 +32,6 @@
 
 \maketitle
 
-
-
 \begin{abstract}
     Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks:
     \begin{mylist}
@@ -71,7 +69,7 @@ The signals (one per channel) of each trial is preprocessed in three steps:
 \begin{enumerate}
   \item \textbf{Subsampling}: the signal is subsampled from 2048 Hz to 500 Hz to reduce the computational needs. Since the EEG data contains information up to approximatively 150 Hz, this subsampling respects the Nyquist criterion.
   \item \textbf{Z-score correction}: Each EEG signal is normalized with Z-score normalization, calculated using the mean and standard deviation of the \textit{baseline signal}.
-  \item \textbf{Resampling}: all trials are resampled to ensure they contain the same number of timepoints.
+  \item \textbf{Resampling}: all trials are resampled to ensure they contain the same number of timepoints. The final number of sample was set to 1500.
 \end{enumerate}
 
 \subsection{Feature extraction}
@@ -120,18 +118,7 @@ TODO?
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
-We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}).
-TODO SARAH
-
-Talk especially about the idea of frequency range! A plot would be nice.
-
-\begin{itemize}
-    \item Amplitude, shape of response \(\to\) difference?
-    \item Response pattern at the same timing?
-    \item Similar frequency characteristics?
-    \item Correlation? High correlation suggests congruence
-    \item Are the results obtained similar for both movements?
-\end{itemize}
+We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggest that these bands are the most informative for differentiating observation from execution.
 
 \subsection{Baseline data}
 In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, and a comparison is done in the results.
@@ -184,7 +171,7 @@ TODO?
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
-TODO SARAH
+As previoulsy with the action recognition task, the models was trained with features extracted from each frequency bands for both execution (see \aref{appfig:accuracies_ex_freq_bands}) and observation (see \aref{appfig:accuracies_obs_freq_bands}). The results are quite different from the action recognition task. The models are not able to capture the differences between the two types of movements, with accuracies barely above chance level. This suggests that the features extracted from the EEG signals are not able to capture the differences between the two types of movements.
 
 \subsection{Models}
 We use the same families of model as in the previous part for both classification in execution tasks and in observation tasks. We test the same hyperparameters sets for MLP, although these tasks might be significantly harder.
