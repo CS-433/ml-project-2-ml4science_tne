@@ -49,6 +49,7 @@ The dataset comprises signals recorded from four participants implanted with sEE
 In this section, we describe the preprocessing and analysis of the data. The dataset is a dictionary containing four subjects (named \textit{s6}, \textit{s7}, \textit{s11} and \textit{s12}). Each subject participated to a number of sessions, ranging from only one session (subjects \textit{s6} and \textit{s7}) up to three (subject \textit{s11}). During each sessions, the subjects completed 256 tasks, equally distributed as observation or execution tasks. The number and location of the channels are not identical across subjects, as they were previously implanted.
 
 \subsection{Channel responsiveness}
+\label{sec:channelresponsiveness}
 We first filtered the channels of interest: for a given channel and task, we define i) the \textit{baseline signal} as the average signal across all task-specific trials in the one-second window between the start of the trial and the cue light turning on, and ii) the \textit{effect signal} as the average signal across all task-specific trials in the one-second equally spaced window surrounding the moment the object is grasped, whether by the subject or the experimenter. Using Welch's method\cite{welch}, we computed the power spectral density (PSD) for both the \textit{baseline signal} and the \textit{effect signal}. We then performed a t-test to compare the PSDs and define a \textit{responsive channel} as a channel with a statistically significative t-test (\(\alpha<0.05\), hyperparameter). This analysis was conducted separately for channels responsive during observation trials, execution trials, and responsive to both. As channels vary across subjects, the preprocessing was conducted individually for each subject.
 
 \subsection{Data preprocessing}
@@ -61,6 +62,10 @@ The signals (one per channel) of each trial is preprocessed in three steps:
 \end{enumerate}
 
 \subsection{Feature extraction}
+Participant with multiple sessions were handled as if they had a larger number of trials. Each task have it's own dataset based on the classification task to perform. For action recognition, all trials were taken and labeled as execution and observation trial. For movement recognition, trials were taken accordingly to the action type studied and labeled based on the movement type. For all dataset, the features were extracted in a similar way. For each responsive channels of a given task (see \ref{sec:channelresponsiveness}), the trial signal was bandpass-filtered filter between the following frequency bands; alpha (8-12 Hz), beta (12-30 Hz), gamma (30-100 Hz) and theta (4-8 Hz). For each frequency band, the rectified envelope of the singal was calculated using the Hilbert transform. The trial was separated in windows of 1000 time point, separated by a step of 100 time point. The values of one window were summarized using the mean and the standard deviation. Finally, features from each responsive channels, each frequency bands and each time window were concatenated in a final dataframe.
+
+
+
 TODO SARAH
 
 Talk especially about the idea of frequency range! A plot would be nice.
@@ -264,6 +269,9 @@ Advanced methods exist to encrypt data while allowing computations on it\cite{ap
 
 \section*{Acknowledgements}
 We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
+
+\newpage
+
 \section{Appendix}
 \subsection{Experimental setup}
 The participants were asked to keep their hands on the resting positions. The led lights are used both to indicate who will realise the action and to specify which objects has to be grasped. A.) execution trial: the participant must pick the small green ball using a precise pinch grasp. B.) observation trial: the experimenter must pick the large red ball using a power grasp. C.) control action, not used in this project.
@@ -328,6 +336,8 @@ Each trial is structured as follows: in an execution trial, the trial begins wit
     \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
 \end{figure}
 \FloatBarrier
+
+\newpage
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
