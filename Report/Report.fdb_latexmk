@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex Report"] 1734527983.21393 "Report.aux" "Report.bbl" "Report" 1734528021.09854 0
+["bibtex Report"] 1734528199.4402 "Report.aux" "Report.bbl" "Report" 1734528232.64844 0
   "./IEEEtran.bst" 1726749082 61931 016987d9be15acf51cdd7252d40ecec2 ""
   "./ref.bib" 1734422764 17443 ce594584f099d72c9bb5a4b97ebd4fde ""
-  "Report.aux" 1734528020 10415 0bb4b475320dec9e79b0fc930de03e1d "pdflatex"
+  "Report.aux" 1734528231 10614 ce41996c570f036db475405a969171f4 "pdflatex"
   (generated)
   "Report.bbl"
   "Report.blg"
   (rewritten before read)
-["pdflatex"] 1734528019.33758 "c:/Users/sarah/OneDrive/NXMA1/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734528021.09936 0
+["pdflatex"] 1734528230.74283 "c:/Users/sarah/OneDrive/NXMA1/ML/ml-project-2-ml4science_tne/Report/Report.tex" "Report.pdf" "Report" 1734528232.64919 0
   "../Code/figures/accuracies_across_part_ExObs.png" 1734517455 45409 fa12052b394a743af6943dffe5484022 ""
   "../Code/figures/accuracies_across_part_ex.png" 1734517455 45675 0536c8a1864b5d004c3fdde4f1340f16 ""
   "../Code/figures/accuracies_across_part_obs.png" 1734517455 46118 1fe0c8ea95c11f98d8b6ddbb132b1f89 ""
@@ -37,6 +37,7 @@
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy9.tfm" 1136765053 1116 25a7bf822c58caf309a702ef79f4afbb ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1247596667 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1247596667 35752 024fb6c41858982481f6968b5fc26508 ""
+  "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1247596667 32762 7fee39e011c23b3589931effd97b9702 ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1247596667 32569 5e5ddc8df908dea60932f3c484a54c0d ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb" 1247596666 32716 08e384dc442464e7285e891af9f45947 ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb" 1136849748 44729 fea0975e20ec51c992338362f05f1146 ""
@@ -94,11 +95,11 @@
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1657800696 9714 ba3194bd52c8499b3f1e3eb91d409670 ""
   "C:/Users/sarah/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "IEEEtran.cls" 1726749083 206573 001edea5a345402fab5a141a4aef7a27 ""
-  "Report.aux" 1734528020 10415 0bb4b475320dec9e79b0fc930de03e1d "pdflatex"
-  "Report.bbl" 1734527983 6597 b2247c3f504eb0df6ab052d953bfdacf "bibtex Report"
-  "Report.out" 1734528020 4074 33be423345a6b4c4c3710391dee76c0f "pdflatex"
-  "Report.tex" 1734528018 29510 591a91277a10ed2ff1a810597fec5d1d ""
-  "c:/Users/sarah/OneDrive/NXMA1/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734528018 29510 591a91277a10ed2ff1a810597fec5d1d ""
+  "Report.aux" 1734528231 10614 ce41996c570f036db475405a969171f4 "pdflatex"
+  "Report.bbl" 1734528199 6597 b2247c3f504eb0df6ab052d953bfdacf "bibtex Report"
+  "Report.out" 1734528231 4366 5c26a2f2046759b2cdd2ac56a22455d9 "pdflatex"
+  "Report.tex" 1734528229 29919 c4953f45cca54963ff63a333531fd4a4 ""
+  "c:/Users/sarah/OneDrive/NXMA1/ML/ml-project-2-ml4science_tne/Report/Report.tex" 1734528229 29919 c4953f45cca54963ff63a333531fd4a4 ""
   "images/2024-12-11-13-41-23.png" 1734164129 67043 be219e7e3b5f0d108b84c2572b263b7f ""
   "images/2024-12-11-13-41-48.png" 1734164129 50888 5c8e88c42e5dd0f4c957bef4edb172e6 ""
   "images/Human-brain.png" 1734502613 690483 79bf2545b41a5555e2e3ad1c02e9e057 ""
