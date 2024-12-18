@@ -4,6 +4,9 @@
 \usepackage{graphicx}	% For figure environment
 \usepackage{amsmath}
 \usepackage{placeins}
+\usepackage[inline]{enumitem}
+\newlist{mylist}{enumerate*}{1}
+\setlist[mylist]{label=(\roman*)}
 
 \renewcommand{\sectionautorefname}{Section}
 
@@ -29,14 +32,24 @@
 
 \maketitle
 
+
+
 \begin{abstract}
-    Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks: distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation. Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning approaches, can effectively classify actions based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the models fail to capture the subtle differences in brain activity and therefore achieve low performances. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
+    Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks:
+    \begin{mylist}
+        \item Decoding execution from observation
+        \item Decoding precision from power grasp in execution paradigm
+        \item Decoding precision from power grasp in observation paradigm
+    \end{mylist}
+    Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning approaches, can effectively classify actions based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the models fail to capture the subtle differences in brain activity and therefore achieve low performances. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
+
+%    distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation.
 \end{abstract}
 
 \section{Introduction}
 Machine Learning (ML) is has become a central tool in neuroscience, with applications in neural engineering (e.g. Brain-Computer Interfaces, BCIs \cite{eegforbci}), diagnostics (see \cite{VIEIRA201758} for an overview) and fundamental research (such as the recent NeuroAI field). For instance, Jalilifard et al. \cite{EmotionClassificationSVM} demonstrated the efficacy of Support Vector Machine classifiers in basic emotions recognition, while Bose et al. \cite{EEGRandomForset} used Random Forest classifiers to automate seizure detection in epileptic patients with high accuracy. Indeed, all major ML methods have been applied to neural signals classification \cite{EEGMLReview}.
 
-In this work, we examine the applications of supervised ML models in three classification problems using stereo electroencephalography (sEEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small object (precision grasp) versus a large object (power grasp); and iii) differentiating between observing the grasp of a small versus a large object. The sEEG data used here were previously collected from epileptic patients implanted with electrodes in various brain regions as part of their clinical treatment.
+In this work, we examine the applications of supervised ML models in three classification problems using stereo electroencephalography (sEEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small object (precision grasp) versus a large object (power grasp); and iii) differentiating between observing the grasp of a small versus a large object. The sEEG data used here were collected from patients with electrodes in various brain regions. All patients were already implanted as partof their clinical treatment for a drug-resistant form of epilepsy.
 
 \autoref{sec:acquisition} outlines the data acquisition process. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the EEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
 
@@ -63,20 +76,6 @@ The signals (one per channel) of each trial is preprocessed in three steps:
 
 \subsection{Feature extraction}
 Participant with multiple sessions were handled as if they had a larger number of trials. Each task have it's own dataset based on the classification task to perform. For action recognition, all trials were taken and labeled as execution and observation trial. For movement recognition, trials were taken accordingly to the action type studied and labeled based on the movement type. For all dataset, the features were extracted in a similar way. For each responsive channels of a given task (see \ref{sec:channelresponsiveness}), the trial signal was bandpass-filtered filter between the following frequency bands; alpha (8-12 Hz), beta (12-30 Hz), gamma (30-100 Hz) and theta (4-8 Hz). For each frequency band, the rectified envelope of the singal was calculated using the Hilbert transform. The trial was separated in windows of 1000 time point, separated by a step of 100 time point. The values of one window were summarized using the mean and the standard deviation. Finally, features from each responsive channels, each frequency bands and each time window were concatenated in a final dataframe.
-
-
-
-TODO SARAH
-
-Talk especially about the idea of frequency range! A plot would be nice.
-
-\begin{itemize}
-    \item Amplitude, shape of response \(\to\) difference?
-    \item Response pattern at the same timing?
-    \item Similar frequency characteristics?
-    \item Correlation? High correlation suggests congruence
-    \item Are the results obtained similar for both movements?
-\end{itemize}
 
 \section{Action recognition}
 \label{sec:actionrecognition}
@@ -121,7 +120,18 @@ TODO?
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
+We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}).
 TODO SARAH
+
+Talk especially about the idea of frequency range! A plot would be nice.
+
+\begin{itemize}
+    \item Amplitude, shape of response \(\to\) difference?
+    \item Response pattern at the same timing?
+    \item Similar frequency characteristics?
+    \item Correlation? High correlation suggests congruence
+    \item Are the results obtained similar for both movements?
+\end{itemize}
 
 \subsection{Baseline data}
 In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, and a comparison is done in the results.
@@ -248,7 +258,7 @@ The participants were asked to keep their hands on the resting positions. The le
 
 \subsection{Timeline}
 \label{subsec:timeline}
-Each trial is structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
+Each trial is structured as follows (see \aref{appfig:timeline}): execution trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
 
 \begin{figure}[h!]
     \center
@@ -377,6 +387,33 @@ The 1D CNN architecture is as follows:
   \item Linear layer of 2 neurons, outputs the logits
 \end{itemize}
 We train all 1D CNNs with a learning rate of 0.001 over 10 epochs with weight decay of 10 to avoid fast overfitting.
+
+\paragraph{Analysis of accuracy by frequency bands}
+Here, we provide an analysis of the accuracies of our model based on which frequency band we give to compute the features.
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ExObs_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, action recognition task on participant \textit{s6}}
+    \label{appfig:accuracies_ExObs_freq_bands}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ex_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (execution)}
+    \label{appfig:accuracies_ex_freq_bands}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_obs_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (observation)}
+    \label{appfig:accuracies_obs_freq_bands}
+\end{figure}
+\FloatBarrier
 
 \newpage
 
