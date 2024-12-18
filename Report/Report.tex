@@ -6,8 +6,10 @@
 \usepackage{placeins}
 \let\labelindent\relax
 \usepackage[inline]{enumitem}
-\newlist{mylist}{enumerate*}{1}
-\setlist[mylist]{label=(\roman*)}
+\newlist{inlineroman}{enumerate*}{1}
+\setlist[inlineroman]{label=(\roman*)}
+\newlist{inlinearabic}{enumerate*}{1}
+\setlist[inlinearabic]{label=(\arabic*)}
 
 \renewcommand{\sectionautorefname}{Section}
 
@@ -35,11 +37,11 @@
 
 \begin{abstract}
     Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks:
-    \begin{mylist}
+    \begin{inlineroman}
         \item Decoding execution from observation
         \item Decoding precision from power grasp in execution paradigm
         \item Decoding precision from power grasp in observation paradigm
-    \end{mylist}
+    \end{inlineroman}
     Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning approaches, can effectively classify actions based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the models fail to capture the subtle differences in brain activity and therefore achieve low performances. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
 
 %    distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation.
@@ -50,7 +52,7 @@ Machine Learning (ML) is has become a central tool in neuroscience, with applica
 
 In this work, we examine the applications of supervised ML models in three classification problems using stereo electroencephalography (sEEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small object (precision grasp) versus a large object (power grasp); and iii) differentiating between observing the grasp of a small versus a large object. The sEEG data used here were collected from patients with electrodes in various brain regions. All patients were already implanted as partof their clinical treatment for a drug-resistant form of epilepsy.
 
-\autoref{sec:acquisition} outlines the data acquisition process. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the EEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
+\autoref{sec:acquisition} outlines the data acquisition process. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the sEEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
 
 \section{Data acquisition}
 \label{sec:acquisition}
@@ -67,11 +69,11 @@ We first filtered the channels of interest: for a given channel and task, we def
 \subsection{Data preprocessing}
 \label{subsec:preproc}
 The signals (one per channel) of each trial is preprocessed in three steps:
-\begin{enumerate}
+\begin{inlinearabic}[]
   \item \textbf{Subsampling}: the signal is subsampled from 2048 Hz to 500 Hz to reduce the computational needs. Since the EEG data contains information up to approximatively 150 Hz, this subsampling respects the Nyquist criterion.
   \item \textbf{Z-score correction}: Each EEG signal is normalized with Z-score normalization, calculated using the mean and standard deviation of the \textit{baseline signal}.
   \item \textbf{Resampling}: all trials are resampled to ensure they contain the same number of timepoints. The final number of sample was set to 1500.
-\end{enumerate}
+\end{inlinearabic}
 
 \subsection{Feature extraction}
 Participant with multiple sessions were handled as if they had a larger number of trials. Each task have it's own dataset based on the classification task to perform. For action recognition, all trials were taken and labeled as execution and observation trial. For movement recognition, trials were taken accordingly to the action type studied and labeled based on the movement type. For all dataset, the features were extracted in a similar way. For each responsive channels of a given task (see \ref{sec:channelresponsiveness}), the trial signal was bandpass-filtered filter between the following frequency bands; alpha (8-12 Hz), beta (12-30 Hz), gamma (30-100 Hz) and theta (4-8 Hz). For each frequency band, the rectified envelope of the singal was calculated using the Hilbert transform. The trial was separated in windows of 1000 time point, separated by a step of 100 time point. The values of one window were summarized using the mean and the standard deviation. Finally, features from each responsive channels, each frequency bands and each time window were concatenated in a final dataframe.
@@ -83,14 +85,16 @@ In this first classification task, we train and optimize different ML models to 
 \subsection{Responsivity of channels}
 The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the t-tests' p-value. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels, respectively in the precentral gyrus (5), and the postcentral gyrus (5) over a total of 40 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
+\vspace{-1em}
 \begin{figure}[h!]
     \center
-    \includegraphics[width=0.8\linewidth]{images/Human-brain.png}
-    \caption{Locations of the ten most responsive channels in participant \textit{s6}: The green area (1) represents the precentral gyrus, and the blue area (2) corresponds to the postcentral gyrus. Edited from Hugh Guiney, CC BY-SA 3.0 \url{https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}
+    \includegraphics[width=0.7\linewidth]{images/Human-brain.png}
+    \caption{Locations of the ten most responsive channels in \textit{s6}: The green area (1) represents the precentral gyrus, and the blue area (2) corresponds to the postcentral gyrus. Edited from Hugh Guiney, CC BY-SA 3.0 \url{https://creativecommons.org/licenses/by-sa/3.0}, via Wikimedia Commons}
     \label{fig:s6actionrecogchannels}
 \end{figure}
 \FloatBarrier
 
+\vspace{-1em}
 \begin{table}[h!]
     \centering
     \begin{tabular}{| c | c | c |}
@@ -110,13 +114,10 @@ The locations of the responsive channels is critical in understanding a potentia
     \label{tab:actionrecogchannellocations}
 \end{table}
 
+\vspace{-1.5em}
 For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. But on the contrary, the number of responsive channels is quite similar for most participants, sitting around 30, with the exception of participant \textit{s6} with 40 channels.
 
 The regions with the most importance are similar across participants and are directly linked to movement (ex : prec.) or somatosensory information (ex : postc.). This makes sense as the task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that are more related to self-awareness and self-perception (ex: sf. and ins.), which could be much more linked to the observation trials.
-
-TODO?
-
-For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
 We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggest that these bands are the most informative for differentiating observation from execution.
@@ -153,9 +154,6 @@ The MLP is also performing very well for participant \textit{s6}: on the test se
 \end{figure}
 \FloatBarrier
 
-\subsection{Discussion}
-As expected, we obtain very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain better accuracies when given carefully crafted features.
-
 \section{Movement recognition}
 \label{sec:objectrecognition}
 For the second and third type of classification tasks, we analyze whether ML models are able to classify the type of movement done (precision grasp or power grasp) during execution and observation. We expect both tasks to be hard to learn. Observation, in particular, is a complex task, as the participant is simply seeing two different movements that have the same goal of lifting an object. In this part, we lessen the restrictions to select the \textit{responsive channels}: it suffices for a channel to be responsive in execution or in observation respectfully to be included.
@@ -166,10 +164,6 @@ The number of responsive channels and the locations of the ten most responsive c
 In both of these tasts, we see similar overall trends between all of the participants. Most channels are located in regions related to movement and somatosensory information such as the precentral gyrus (prec.) and the postcentral gyrus (postc.). Similarly to the first task, participant \textit{s6} has areas linked very directly to hand movement, while participants \textit{s11} and \textit{s12} have activity in areas that are more related to self-awareness and self-perception (ex: sf. and ins.). This could explain a potential difference in interpretability of their data since they are much less directly linked to hand movement.
 
 The number of responsive channels is quite different between participants and between the two tasks. The responsive channels are different in terms of location. We find some similarities but no clear pattern.
-
-TODO?
-
-For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
 As previoulsy with the action recognition task, the models was trained with features extracted from each frequency bands for both execution (see \aref{appfig:accuracies_ex_freq_bands}) and observation (see \aref{appfig:accuracies_obs_freq_bands}). For execution, the models performed slightly better than chance level, with theta and high gamma bands that performed (higher than 60\%). For observation, most models are below chance level except for high gamma frequency band (around 52-58\%).
@@ -188,9 +182,6 @@ LR with and without PCA tends to perform better than the other models, and with 
 \paragraph{Observation trials}
 Similarly as for the execution distinction, all models have low accuracy, barely performing better than chance. Except for participant \textit{s11}, SVM is at chance level. LR performs slightly better than the other models. Again, all MLP models fail to capture meaningful information from our features.
 
-\subsection{Discussion}
-TODO???
-
 \section{Pure deep learning approach}
 \label{sec:deeplearning}
 Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. We explore this question in this section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. The hope is that the convolutional layers manage to extract important features from the signal, giving it as input to the subsequent MLP. In this section, we are not focusing on performance and thus wont optimize models. Instead, we are attempting new techniques as proof of concept. As MLP, we use only participant \textit{s6} in this section.
@@ -206,7 +197,7 @@ The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}. We ar
 
 \section{Discussion}
 \label{sec:discussion}
-
+For the action recognition task, we obtain as expected very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain better accuracies when given carefully crafted features.
 
 For the frequency bands analysis, we can see that all frequency bands have enough information to decode successfully the action type. However, regarding the movement type, it seems that none of the frequency bands pocess enough information on its own, which means that the information is spread across the different frequency bands.
 
