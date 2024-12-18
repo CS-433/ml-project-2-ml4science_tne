@@ -193,7 +193,7 @@ TODO???
 
 \section{Pure deep learning approach}
 \label{sec:deeplearning}
-Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. We explore this question in this section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. The hope is that the convolutional layers manage to extract important features from the signal, giving it as input to the subsequent MLP. In this section, we are not focusing on performance and thus wont optimize models. Instead, we are attempting new techniques as proof of concept.
+Instead of extracting features on the responsive channels before training deep networks, one can ask whether the networks should learn to do that themselves. We explore this question in this section. We train two types of Convolution Neural Networks (CNN) directly on the trial signals. The hope is that the convolutional layers manage to extract important features from the signal, giving it as input to the subsequent MLP. In this section, we are not focusing on performance and thus wont optimize models. Instead, we are attempting new techniques as proof of concept. As MLP, we use only participant \textit{s6} in this section.
 
 \subsection{1D CNN}
 One-dimensional CNNs are composed of kernels that are convolved with a channel's signal directly. As they operate on data in one dimension, the input will be a tensor of size \((N, C, L)\), where \(N\) is the batch size, \(C\) the number of (responsive) channels and \(L\) the fixed length of each trial. This is close to how we computed our features: supposing the same kernel size as the length of our moving averages, we would get the same features if the network learned moving averages too. Given this and the known power of CNNs, we expect this model to have the best performance. The caveat is overfitting, as we have small datasets.
@@ -202,10 +202,7 @@ One-dimensional CNNs are composed of kernels that are convolved with a channel's
 Two-dimensional CNNs are composed of 2D kernels that will operate on multiple channels at the same time. This means that we give as input a tensor of dimensions \((N, C, H, W)\), with \(H\) the number of (responsive) channels and \(W\) the length of each signal. The use of naming dimensions \(H\) and \(W\) not arbitrary. Indeed, we can think of this superposition of channels as a picture, where each signal is a position on the \(y\)-axis and every timepoint a position on the \(x\)-axis.
 
 \subsection{Results}
-TODO FLORIAN
-The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}.
-
-% Both types of CNN achieve high performance on the action recognition task (). However, their performance are unfortunately lacking in the two other movement recognition tasks. The results are however encouraging, and more work should be done on finding good CNNs for analysing such data.
+The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}. We are not testing multiple CNN architecture, but use a validation set for the learning rate, weight decay and the subsequent MLP layers. When passing the test set through the model, we obtain great results: the 2D CNN can recognize actions with a 96\% accuracy, while its 1D counterpart get is simple 100\% correct. For movement recognition, the results are less surprising: the 2D CNN manages only 62\% accuracy for execution, with a 92\% accuracy for the 1D CNN. In observation, both models are encouraging, with 77\% accuracy for 2D and 85\% for 1D CNN. Those results are highly encouraging, and we encourage further research towards an automatic way to extract features.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -215,7 +212,7 @@ For the frequency bands analysis, we can see that all frequency bands have enoug
 
 \section{Conclusion}
 \label{sec:conclusion}
-In this project, we used various ML models to analyze the classification accuracies of three distinct tasks. While every model was capable of classifying well the first task, the performance dropped when the differences in brain signals were more subtle. Our work therefore shows that ML models can already successfully be applied to (s)EEG signals without the need for handcrafted features, but they need clear differences in signal. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models.
+In this project, we used various ML models to analyze the classification accuracies of three distinct tasks. While every model was capable of classifying well the first task, the performance dropped when the differences in brain signals were more subtle. Our work therefore shows that ML models can already successfully be applied to (s)EEG signals without the need for handcrafted features, but they need clear differences in signal. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models. Maybe the future of feature extraction is by using ML methods directly.
 
 \newpage
 %%%%%%%%%% ETHICAL RISKS %%%%%%%%%%
