@@ -204,6 +204,8 @@ Two-dimensional CNNs are composed of 2D kernels that will operate on multiple ch
 
 \subsection{Results}
 TODO FLORIAN
+The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}.
+
 % Both types of CNN achieve high performance on the action recognition task (). However, their performance are unfortunately lacking in the two other movement recognition tasks. The results are however encouraging, and more work should be done on finding good CNNs for analysing such data.
 
 \section{Discussion}
@@ -240,7 +242,7 @@ The participants were asked to keep their hands on the resting positions. The le
 \begin{figure}[h!]
     \center
     \includegraphics[width=\linewidth]{images/2024-12-11-13-41-23.png}
-    \caption{Experimental setup}
+    \caption{Experimental setup; courtesy of L. Pollina}
 \end{figure}
 \FloatBarrier
 
@@ -251,7 +253,7 @@ Each trial is structured as follows: in an execution trial, the trial begins wit
 \begin{figure}[h!]
     \center
     \includegraphics[width=\linewidth]{images/2024-12-11-13-41-48.png}
-    \caption{Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation)}
+    \caption{Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation); courtesy of L. Pollina}
     \label{appfig:timeline}
 \end{figure}
 \FloatBarrier
@@ -342,6 +344,39 @@ The following graphs represent the accuracies obtained by model and by participa
     \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
 \end{figure}
 \FloatBarrier
+
+\subsection{CNN architectures}
+\paragraph{2D CNNs}
+The 2D CNN architecture is as follows:
+\begin{itemize}
+  \item Convolution layer: 2 channels, kernels of size \(5\times 5\), padding of 1, stride of size \(3\times 3\), ReLU
+  \item Max-pooling layer: kernel of size \(2\times 2\)
+  \item Batch normalization
+  \item Convolution layer: 4 channels, kernels of size \(3\times 3\), padding of 1, stride of size \(3\times 3\), ReLU
+  \item Max-pooling layer: kernel of size \(2\times 2\)
+  \item Batch normalization
+  \item Flattening
+  \item Linear layer of 32 neurons, ReLU, dropout of 0.1
+  \item Linear layer of 16 neurons, ReLU, dropout of 0.1
+  \item Linear layer of 2 neurons, outputs the logits
+\end{itemize}
+We train all 2D CNNs with a learning rate of 0.001 over 10 epochs with a weight decay of 10 to avoid fast overfitting.
+
+\paragraph{1D CNNs}
+The 1D CNN architecture is as follows:
+\begin{itemize}
+  \item Convolution layer: 8 channels, kernel of size 10, padding of 1, stride of size 5, ReLU
+  \item Max-pooling layer: kernel of size 2
+  \item Batch normalization
+  \item Convolution layer: 16 channels, kernel of size 50, padding of 1, stride of size 5, ReLU
+  \item Max-pooling layer: kernel of size 2
+  \item Batch normalization
+  \item Flattening
+  \item Linear layer of 64 neurons, ReLU, dropout of 0.1
+  \item Linear layer of 32 neurons, ReLU, dropout of 0.1
+  \item Linear layer of 2 neurons, outputs the logits
+\end{itemize}
+We train all 1D CNNs with a learning rate of 0.001 over 10 epochs with weight decay of 10 to avoid fast overfitting.
 
 \newpage
 
