@@ -38,11 +38,11 @@ Machine Learning (ML) is has become a central tool in neuroscience, with applica
 
 In this work, we examine the applications of supervised ML models in three classification problems using electroencephalography (EEG) signals: i) distinguishing between the execution and observation of a movement; ii) differentiating between grasping a small object (precision grasp) versus a large object (power grasp); and iii) differentiating between observing the grasp of a small versus a large object. The sEEG data used here were previously collected from epileptic patients implanted with electrodes in various brain regions as part of their clinical treatment.
 
-\autoref{sec:problem} outlines the data acquisition process and its relevance to our classification tasks. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the EEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
+\autoref{sec:acquisition} outlines the data acquisition process. In \autoref{sec:analysis}, we describe the preprocessing of the sEEG signals and the extraction of relevant features. \autoref{sec:actionrecognition} and \autoref{sec:objectrecognition} present the models applied to our classification problems and their performance. In \autoref{sec:deeplearning}, we explore the idea of using only Deep Learning (DL) methods to directly extract features from the EEG signal and train models. Finally, we discuss our results in \autoref{sec:discussion} and conclude in \autoref{sec:conclusion}.
 
-\section{Data acquisition and problem specification}
-\label{sec:problem}
-The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial. A timeline can be found in \aref{appfig:timeline}.
+\section{Data acquisition}
+\label{sec:acquisition}
+The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials. Their structure is explained in \ref{subsec:timeline}.
 
 \section{Data analysis}
 \label{sec:analysis}
@@ -80,6 +80,8 @@ In this first classification task, we train and optimize different family of ML 
 \subsection{Responsivity of channels}
 The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the \(\alpha\) value of the t-test. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels.
 
+For this participant, the ten most responsive regions were respectively in the precentral gyrus (5), and the postcentral gyrus (5) over a total of 40 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
+
 \begin{figure}[h!]
     \center
     \includegraphics[width=0.8\linewidth]{images/Human-brain.png}
@@ -87,8 +89,6 @@ The locations of the responsive channels is critical in understanding a potentia
     \label{fig:s6actionrecogchannels}
 \end{figure}
 \FloatBarrier
-
-For this participant, the ten most responsive regions were respectively in the precentral gyrus (5), and the postcentral gyrus (5) over a total of 40 responsive channels. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
 \begin{table}[h!]
     \centering
@@ -143,14 +143,14 @@ We try different MLP and select the best by using a validation subset. All our m
 \subsection{Results}
 We tested all models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
 
+The MLP is also performing very well for participant \textit{s6}: on the test set, we obtain an accuracy of 95\% while the baseline is at 49\%. The best model is also the simplest: two layers of 8 neurons each.
+
 \begin{figure}[h!]
   \center
   \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ExObs.png}
   \caption{Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}
 \end{figure}
 \FloatBarrier
-
-The MLP is also performing very well for participant \textit{s6}: on the test set, we obtain an accuracy of 95\% while the baseline is at 49\%. The best model is also the simplest: two layers of 8 neurons each.
 
 \subsection{Discussion}
 As expected, we obtain very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain much stronger accuracies when given carefully crafted features.
@@ -261,6 +261,9 @@ Even without speculating about future developments in brain signal analysis, EEG
 Advanced methods exist to encrypt data while allowing computations on it\cite{app11167360}. Unfortunately, the time and scope of this project did not permit the implementation of such technologies.
 
 %% Not in the 4-page limit
+
+\section*{Acknowledgements}
+We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
 \section{Appendix}
 \subsection{Experimental setup}
 The participants were asked to keep their hands on the resting positions. The led lights are used both to indicate who will realise the action and to specify which objects has to be grasped. A.) execution trial: the participant must pick the small green ball using a precise pinch grasp. B.) observation trial: the experimenter must pick the large red ball using a power grasp. C.) control action, not used in this project.
@@ -272,7 +275,10 @@ The participants were asked to keep their hands on the resting positions. The le
 \end{figure}
 \FloatBarrier
 
-\textbf{Timeline}
+\subsection{Timeline}
+\label{subsec:timeline}
+Each trial is structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
+
 \begin{figure}[h!]
     \center
     \includegraphics[width=\linewidth]{images/2024-12-11-13-41-48.png}
@@ -322,9 +328,6 @@ The participants were asked to keep their hands on the resting positions. The le
     \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
 \end{figure}
 \FloatBarrier
-
-\section*{Acknowledgements}
-We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
