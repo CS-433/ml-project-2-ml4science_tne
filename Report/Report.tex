@@ -58,7 +58,7 @@ The dataset comprises signals recorded from four participants implanted with sEE
 
 \section{Data analysis}
 \label{sec:analysis}
-In this section, we describe the preprocessing and analysis of the data. The dataset is a dictionary containing four subjects (named \textit{s6}, \textit{s7}, \textit{s11} and \textit{s12}). Each subject participated from one up to three sessions. During each session, the subjects completed 256 tasks, equally distributed as observation or execution tasks. The number and location of the channels are not identical across subjects, as they were implanted previous to the experiment.
+In this section, we describe the preprocessing and analysis of the data. The dataset is a dictionary containing four subjects (named \textit{s6}, \textit{s7}, \textit{s11} and \textit{s12}). Each subject participated from one up to three sessions. During each session, the subjects completed 256 tasks, equally distributed across observation and execution tasks \& across movement type. The number and location of the channels are not identical across subjects, as they were implanted previous to the experiment.
 
 \subsection{Channel responsiveness}
 \label{sec:channelresponsiveness}
@@ -122,7 +122,7 @@ For channels where we have response for both ex \& obs, are the responses congru
 We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggest that these bands are the most informative for differentiating observation from execution.
 
 \subsection{Baseline data}
-In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, and a comparison is done in the results.
+In order to verify the claim that channel responsiveness is a critical measure for selecting channels on which to compute the features, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, and a comparison is done in the results. We had to keep in mind that the number of channels are different for both sets of data.
 
 \subsection{Models}
 To create and train the classical ML models, we adopted the well-known and performant Scikit-Learn library \cite{scikitlearn}. The Deep Learning models are developed using the PyTorch library \cite{pytorch}. We selected models based on the literature available on EEG analysis.
@@ -142,7 +142,7 @@ In addition to traditional ML models, we also train Multilayer Perceptron (MLP) 
 We try different MLP and select the best by using a validation subset. MLP models are trained for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay (\(10^{-2}\), hyperparameter) directly during the parameter update, leading to more consistent regularization and better generalization. The MLP is optimized and discussed only for participant \textit{s6}.
 
 \subsection{Results}
-We tested the models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
+We tested the models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance, although it is higher than chance (see \aref{appfig:accuracies_ExObs}). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
 
 The MLP is also performing very well for participant \textit{s6}: on the test set, we obtain an accuracy of 95\% while the baseline is at 49\%. The best model is also the simplest: two layers of 8 neurons each, with a learning rate of \(10^{-1}\).
 
@@ -172,7 +172,9 @@ TODO?
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
-As previoulsy with the action recognition task, the models was trained with features extracted from each frequency bands for both execution (see \aref{appfig:accuracies_ex_freq_bands}) and observation (see \aref{appfig:accuracies_obs_freq_bands}). The results are quite different from the action recognition task. The models are not able to capture the differences between the two types of movements, with accuracies barely above chance level. This suggests that the features extracted from the EEG signals are not able to capture the differences between the two types of movements.
+As previoulsy with the action recognition task, the models was trained with features extracted from each frequency bands for both execution (see \aref{appfig:accuracies_ex_freq_bands}) and observation (see \aref{appfig:accuracies_obs_freq_bands}). For execution, the models performed slightly better than chance level, with theta and high gamma bands that performed (higher than 60\%). For observation, most models are below chance level except for high gamma frequency band (around 52-58\%).
+
+The results are quite different from the action recognition task. The models are not able to capture the differences between the two types of movements, with accuracies barely above chance level. This suggests that the features extracted from the EEG signals are not able to capture the differences between the two types of movements.
 
 \subsection{Models}
 We use the same families of model as in the previous part for both classification in execution tasks and in observation tasks. We test the same hyperparameters sets for MLP, although these tasks might be significantly harder.
@@ -187,8 +189,7 @@ LR with and without PCA tends to perform better than the other models, and with 
 Similarly as for the execution distinction, all models have low accuracy, barely performing better than chance. Except for participant \textit{s11}, SVM is at chance level. LR performs slightly better than the other models. Again, all MLP models fail to capture meaningful information from our features.
 
 \subsection{Discussion}
-TODO SARAH
-Which freq. bands are important? Is it the same across subjects?
+TODO???
 
 \section{Pure deep learning approach}
 \label{sec:deeplearning}
@@ -208,7 +209,9 @@ The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}.
 
 \section{Discussion}
 \label{sec:discussion}
-TODO ALL
+
+
+For the frequency bands analysis, we can see that all frequency bands have enough information to decode successfully the action type. However, regarding the movement type, it seems that none of the frequency bands pocess enough information on its own, which means that the information is spread across the different frequency bands.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -326,6 +329,16 @@ Here, we show the locations of the ten responsive channels in the two movement r
     \label{apptab:acronyms}
 \end{table}
 
+\subsection{Accuracies in action recognition compared to baseline}
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/accuracies_ExObs.png}
+    \caption{Accuracies by model for the action recognition task compared to baseline for participant s6}
+    \label{appfig:accuracies_ExObs}
+\end{figure}
+\FloatBarrier
+
 \subsection{Accuracies in movement recognition}
 The following graphs represent the accuracies obtained by model and by participant for the two movement recognition classification tasks. As mentioned in the main report, these accuracies are all low, due to the difficulty of finding neural differences between the compared tasks.
 
@@ -333,6 +346,7 @@ The following graphs represent the accuracies obtained by model and by participa
     \center
     \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ex.png}
     \caption{Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}
+    \label{appfig:accuracies_across_part_ex}
 \end{figure}
 \FloatBarrier
 
@@ -340,6 +354,7 @@ The following graphs represent the accuracies obtained by model and by participa
     \center
     \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_obs.png}
     \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
+    \label{appfig:accuracies_across_part_obs}
 \end{figure}
 \FloatBarrier
 
