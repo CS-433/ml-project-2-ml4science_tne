@@ -138,17 +138,19 @@ Random Forest (RF) classifiers combine the output of multiple decision trees to 
 \paragraph{MLP}
 In addition to traditional ML models, we also train Multilayer Perceptron (MLP) models. We chose to include MLP as it is widely used in EEG classification\footnote{3'610 results for 'EEG MLP classification' on Google Scholar in 2024 at the time of writing}. The main issue with MLP is that they are universal approximators and are thus prone to overfitting, especially for datasets as small as ours.
 
-We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay directly during the parameter update, leading to more consistent regularization and better generalization.
+We try different MLP and select the best by using a validation subset. All our models train for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay directly during the parameter update, leading to more consistent regularization and better generalization. The MLP is optimized only for participant \textit{s6}.
 
 \subsection{Results}
 We tested all models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance (although it is higher than chance). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
 
 \begin{figure}[h!]
   \center
-  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ExObs.png}
+  \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ExObs.png}
   \caption{Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}
 \end{figure}
 \FloatBarrier
+
+The MLP is also performing very well for participant \textit{s6}: on the test set, we obtain an accuracy of 95\% while the baseline is at 49\%. The best model is also the simplest: two layers of 8 neurons each.
 
 \subsection{Discussion}
 As expected, we obtain very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain much stronger accuracies when given carefully crafted features.
@@ -210,18 +212,16 @@ For channels where we have response for both ex \& obs, are the responses congru
 TODO SARAH
 
 \subsection{Models}
-We use the same families of model as in the previous part, and this for both classifying in execution tasks and in observation tasks.
+We use the same families of model as in the previous part, and this for both classifying in execution tasks and in observation tasks. In particular, we use the same hyperparameters for MLP, although the task might be significantly harder.
 
 \subsection{Results}
 As expected, our results are significantly lower in those tasks than in the first part. We also observe a drop in performance between execution and observation.
 
 \paragraph{Execution trials}
-TODO FLORIAN
-The best model when classifying whether the subject has done a precision or power movement is ... TODO
+Logistic regression with and without PCA tends to perform better than the other models, and with more consistency across participants. SVM performs higher than average only for participant \textit{s11}. RF was not able to capture the subtle differences in the features. Similarly, MLP on participant \textit{s6} does not perform above chance.
 
 \paragraph{Observation trials}
-TODO FLORIAN
-The best model when classifying whether the subject has seen a precision or power movement is ... TODO
+Similarly as for the execution distinction, all models have low accuracy, barely performing better than chance. Except for participant \textit{s11}, SVM is at chance. Logistic regression performs slightly better than the other models. As previously, all MLP models fail to capture meaningful information from our features.
 
 \subsection{Discussion}
 TODO SARAH
@@ -311,14 +311,14 @@ The participants were asked to keep their hands on the resting positions. The le
 \subsection{Accuracies in movement recognition}
 \begin{figure}[h!]
     \center
-    \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ex.png}
+    \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ex.png}
     \caption{Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}
 \end{figure}
 \FloatBarrier
 
 \begin{figure}[h!]
     \center
-    \includegraphics[width=\linewidth]{../figures/accuracies_across_part_obs.png}
+    \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_obs.png}
     \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
 \end{figure}
 \FloatBarrier

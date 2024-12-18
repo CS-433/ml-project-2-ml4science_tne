@@ -155,7 +155,7 @@ if __name__ == '__main__':
     accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': []}
 
     for part_name in PARTICIPANTS:
-        print(f'Processing participant {part_name}')
+        print(f'Processing participant {part_name}...')
         ex_features = pd.read_hdf(f'saved/ex_features_{part_name}_mvt.h5', 'df')
         obs_features = pd.read_hdf(f'saved/obs_features_{part_name}_mvt.h5', 'df')
         ExObs_features = pd.read_hdf(f'saved/features_{part_name}_ExObs.h5', 'df')
