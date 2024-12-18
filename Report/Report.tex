@@ -42,21 +42,14 @@ In this work, we examine the applications of supervised ML models in three class
 
 \section{Data acquisition and problem specification}
 \label{sec:problem}
-The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial.
-
-\begin{figure}[h!]
-  \center
-  \includegraphics[width=\linewidth]{images/2024-12-11-13-41-48.png}
-  \caption{Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation)}
-\end{figure}
-\FloatBarrier
+The dataset comprises signals recorded from four participants implanted with sEEG electrodes in distinct brain regions as part of their epilepsy treatment. During multiple experimental sessions, participants were instructed to either observe or execute specific motor tasks. These tasks involved two types of movements: a palmar grasp (power-based movement) and a pinch grasp (precision-based movement). Each session included multiple trials structured as follows: in an execution trial, the trial begins with a start cue. One second later, a light cue signals the type of object (small or large) to be targeted. This light remains illuminated for 0.5 seconds before turning off. After an additional 1.5 seconds, a "go" signal prompts the participant to lift their hand from the resting position, grasp the indicated object, return it to its original location, and place their hand back in the resting position. Observation trials followed an identical structure, except that participants passively observed the experimenter performing the actions. A light cue indicated the participant's role (execution or observation) in each trial. A timeline can be found in \aref{appfig:timeline}.
 
 \section{Data analysis}
 \label{sec:analysis}
 In this section, we describe the preprocessing and analysis of the data. The dataset is a dictionary containing four subjects (named \textit{s6}, \textit{s7}, \textit{s11} and \textit{s12}). Each subject participated to a number of sessions, ranging from only one session (subjects \textit{s6} and \textit{s7}) up to three (subject \textit{s11}). During each sessions, the subjects completed 256 tasks, equally distributed as observation or execution tasks. The number and location of the channels are not identical across subjects, as they were previously implanted.
 
 \subsection{Channel responsiveness}
-We first filtered the channels of interest: for a given channel and task, we define i) the \textit{baseline signal} as the average signal across all task-specific trials in the one-second window between the start of the trial (1) and the cue light turning on (2), and ii) the \textit{effect signal} as the average signal across all task-specific trials in the one-second equally spaced window surrounding the moment the object is grasped (6), whether by the subject or the experimenter. Using Welch's method\cite{welch}, we computed the power spectral density (PSD) for both the \textit{baseline signal} and the \textit{effect signal}. We then performed a t-test to compare the PSDs and define a \textit{responsive channel} as a channel with a statistically significative t-test (\(\alpha<0.05\), hyperparameter). This analysis was conducted separately for channels responsive during observation trials, execution trials, and responsive to both. As channels vary across subjects, the preprocessing was conducted individually for each subject.
+We first filtered the channels of interest: for a given channel and task, we define i) the \textit{baseline signal} as the average signal across all task-specific trials in the one-second window between the start of the trial and the cue light turning on, and ii) the \textit{effect signal} as the average signal across all task-specific trials in the one-second equally spaced window surrounding the moment the object is grasped, whether by the subject or the experimenter. Using Welch's method\cite{welch}, we computed the power spectral density (PSD) for both the \textit{baseline signal} and the \textit{effect signal}. We then performed a t-test to compare the PSDs and define a \textit{responsive channel} as a channel with a statistically significative t-test (\(\alpha<0.05\), hyperparameter). This analysis was conducted separately for channels responsive during observation trials, execution trials, and responsive to both. As channels vary across subjects, the preprocessing was conducted individually for each subject.
 
 \subsection{Data preprocessing}
 \label{subsec:preproc}
@@ -226,23 +219,9 @@ As expected, our results are significantly lower in those tasks than in the firs
 TODO FLORIAN
 The best model when classifying whether the subject has done a precision or power movement is ... TODO
 
-\begin{figure}[h!]
-  \center
-  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ex.png}
-  \caption{Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}
-\end{figure}
-\FloatBarrier
-
 \paragraph{Observation trials}
 TODO FLORIAN
 The best model when classifying whether the subject has seen a precision or power movement is ... TODO
-
-\begin{figure}[h!]
-  \center
-  \includegraphics[width=\linewidth]{../figures/accuracies_across_part_obs.png}
-  \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
-\end{figure}
-\FloatBarrier
 
 \subsection{Discussion}
 TODO SARAH
@@ -293,6 +272,15 @@ The participants were asked to keep their hands on the resting positions. The le
 \end{figure}
 \FloatBarrier
 
+\textbf{Timeline}
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{images/2024-12-11-13-41-48.png}
+    \caption{Timing of the trials: the areas shaded in grey indicates fixed timing, and the areas shaded in blue indicates timing that depends on the speed of execution of either the participant (execution) or the experimenter (observation)}
+    \label{appfig:timeline}
+  \end{figure}
+  \FloatBarrier
+
 \subsection{Acronyms}
 \begin{table}[h!]
     \centering
@@ -320,13 +308,20 @@ The participants were asked to keep their hands on the resting positions. The le
     \label{tab:acronyms}
 \end{table}
 
-% \begin{figure}[tbp]
-%   \centering
-%   \includegraphics[width=\columnwidth]{denoised_signal_1d}
-%   \caption{Signal compression and denoising using the Fourier basis.}
-%   \vspace{-3mm}
-%   \label{fig:denoise-fourier}
-% \end{figure}
+\subsection{Accuracies in movement recognition}
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../figures/accuracies_across_part_ex.png}
+    \caption{Accuracies by model and participant for the movement recognition task, executed by the subjects (execution)}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../figures/accuracies_across_part_obs.png}
+    \caption{Accuracies by model and participant for the movement recognition task, executed by the experimenter (observation)}
+\end{figure}
+\FloatBarrier
 
 \section*{Acknowledgements}
 We thank Leonardo Pollina for taking us with him on this project, and for his quick and helpful answers to all our questions.
