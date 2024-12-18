@@ -68,26 +68,6 @@ def run_models(accuracies, features):
     X_train = scaler.fit_transform(X_train)
     X_val = scaler.transform(X_val)
     X_test = scaler.transform(X_test)
-
-    mlp = MLP(X_train.shape[1], 2, layers=(8, 8))
-    trainset = DfDataset(X_train, y_train)
-    valset = DfDataset(X_val, y_val)
-    train_loader = DataLoader(trainset, batch_size=4, shuffle=True)
-    val_loader = DataLoader(valset, batch_size=4, shuffle=False)
-
-    trainer = Trainer(mlp, LR, EPOCHS, WEIGHT_DECAY, save_path='saved/mlp.pth')
-    trainer.train(train_loader, val_loader, verbose=False)
-    
-    mlp.eval()
-    testset = DfDataset(X_test, y_test)
-    acc = 0
-    for input, label in testset:
-        pred = mlp(input)
-        if torch.argmax(pred) == label:
-            acc += 1
-
-    acc /= len(testset)
-    accuracies['MLP'].append(acc)
     
 def plot_accuracy(accuracies, title, task, font_loc='best'):
     """Utility function to plot the accuracy of different models and participants.
@@ -168,11 +148,11 @@ if __name__ == '__main__':
     
     # load.py needs to be run before this script
     for part_name in PARTICIPANTS:
-        if not os.path.exists(f'saved/{part_name}.pkl'): raise FileNotFoundError(f'Participant {part_name} not found - Run load.py first')
+        if not os.path.exists(f'saved/{part_name}.pkl'): raise FileNotFoundError(f'Participant {part_name} not found - Run load_data.py first')
     
-    accuracies_ExObs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
-    accuracies_ex = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
-    accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
+    accuracies_ExObs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': []}
+    accuracies_ex = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': []}
+    accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': []}
 
     for part_name in PARTICIPANTS:
         print(f'Processing participant {part_name}')
