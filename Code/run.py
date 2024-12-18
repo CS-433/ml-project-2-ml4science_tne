@@ -75,21 +75,22 @@ def run_models(accuracies, features):
     X_val = scaler.transform(X_val)
     X_test = scaler.transform(X_test)
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
     mlp = MLP(X_train.shape[1], 2, layers=(8, 8))
     trainset = DfDataset(X_train, y_train)
     valset = DfDataset(X_val, y_val)
-    train_loader = DataLoader(trainset, batch_size=4, shuffle=True)
-    val_loader = DataLoader(valset, batch_size=4, shuffle=False)
+    train_loader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=4,
+                              worker_init_fn=seed_worker, generator=g)
+    val_loader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=4,
+                              worker_init_fn=seed_worker, generator=g)
 
-    trainer = Trainer(mlp, LR, EPOCHS, WEIGHT_DECAY, save_path='saved/mlp.pth', device=device)
+    trainer = Trainer(mlp, LR, EPOCHS, WEIGHT_DECAY, save_path='saved/mlp.pth', verbose=False)
     trainer.train(train_loader, val_loader)
     
+    mlp.eval()
     testset = DfDataset(X_test, y_test)
     acc = 0
     for input, label in testset:
-        pred = trainer.model(input)
+        pred = mlp(input)
         if torch.argmax(pred) == label:
             acc += 1
 
