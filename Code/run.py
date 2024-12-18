@@ -16,12 +16,6 @@ torch.use_deterministic_algorithms(True) # PyTorch will use deterministic algori
 random.seed(seed_num) # Python's random will use seed_num
 np.random.seed(seed_num) # NumPy's random number generator will use seed_num
 torch.manual_seed(seed_num) # PyTorch's random number will use seed_num
-def seed_worker(worker_id): # Seed synchronized on all parallel works
-    worker_seed = torch.initial_seed() % 2**32
-    np.random.seed(worker_seed)
-    random.seed(worker_seed)
-g = torch.Generator() # Creates an instance of PyTorch's random number generator
-g.manual_seed(seed_num) # Set PyTorch generator g to seed_num
 
 TEST_SIZE = 0.3
 PCA_EXPL_VAR = 0.95
@@ -78,13 +72,11 @@ def run_models(accuracies, features):
     mlp = MLP(X_train.shape[1], 2, layers=(8, 8))
     trainset = DfDataset(X_train, y_train)
     valset = DfDataset(X_val, y_val)
-    train_loader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=4,
-                              worker_init_fn=seed_worker, generator=g)
-    val_loader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=4,
-                              worker_init_fn=seed_worker, generator=g)
+    train_loader = DataLoader(trainset, batch_size=4, shuffle=True)
+    val_loader = DataLoader(valset, batch_size=4, shuffle=False)
 
-    trainer = Trainer(mlp, LR, EPOCHS, WEIGHT_DECAY, save_path='saved/mlp.pth', verbose=False)
-    trainer.train(train_loader, val_loader)
+    trainer = Trainer(mlp, LR, EPOCHS, WEIGHT_DECAY, save_path='saved/mlp.pth')
+    trainer.train(train_loader, val_loader, verbose=False)
     
     mlp.eval()
     testset = DfDataset(X_test, y_test)
@@ -183,16 +175,17 @@ if __name__ == '__main__':
     accuracies_obs = {'LR': [], 'LR PCA': [], 'SVM': [], 'SVM PCA': [], 'RF': [], 'MLP': []}
 
     for part_name in PARTICIPANTS:
-        participant = Participant.load_from_pickle(f'saved/{part_name}.pkl')
+        print(f'Processing participant {part_name}')
         ex_features = pd.read_hdf(f'saved/ex_features_{part_name}_mvt.h5', 'df')
         obs_features = pd.read_hdf(f'saved/obs_features_{part_name}_mvt.h5', 'df')
         ExObs_features = pd.read_hdf(f'saved/features_{part_name}_ExObs.h5', 'df')
         
+        print(f'Running models for participant {part_name}...')
         run_models(accuracies_ExObs, ExObs_features)
         run_models(accuracies_ex, ex_features)
         run_models(accuracies_obs, obs_features)
         
-    
+    print('Saving results...')
     saved_dir = os.path.join(os.getcwd(), 'saved')
     if not os.path.exists(saved_dir):
         os.makedirs(saved_dir)
@@ -206,4 +199,5 @@ if __name__ == '__main__':
     plot_accuracy(accuracies_ex, 'Accuracies by model (execution)', 'ex')
     plot_accuracy(accuracies_obs, 'Accuracies by model (observation)', 'obs')
     plot_accuracy(accuracies_ExObs, 'Accuracies by model (action recognition)', 'ExObs', font_loc='lower left')
+    print('Done! The plots are saved in the saved directory.')
     
