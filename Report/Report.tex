@@ -4,6 +4,7 @@
 \usepackage{graphicx}	% For figure environment
 \usepackage{amsmath}
 \usepackage{placeins}
+\let\labelindent\relax
 \usepackage[inline]{enumitem}
 \newlist{mylist}{enumerate*}{1}
 \setlist[mylist]{label=(\roman*)}
@@ -31,8 +32,6 @@
 }
 
 \maketitle
-
-
 
 \begin{abstract}
     Machine Learning (ML) techniques have become increasingly prominent in neuroscientific research. In particular, many studies investigated the use of ML tools on electroencephalography (EEG) recordings to classify or predict physical and mental states, often with great success. In this work, we apply ML models to different classification tasks:
@@ -120,7 +119,7 @@ TODO?
 For channels where we have response for both ex \& obs, are the responses congruent (similar pattern) or incongruent (different)?
 
 \subsection{Analysis of frequency bands}
-We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}).
+% We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}).
 TODO SARAH
 
 Talk especially about the idea of frequency range! A plot would be nice.
@@ -355,7 +354,35 @@ The following graphs represent the accuracies obtained by model and by participa
 \end{figure}
 \FloatBarrier
 
+\subsection{Analysis of accuracy by frequency bands}
+Here, we provide an analysis of the accuracies of our model based on which frequency band we give to compute the features.
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ExObs_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, action recognition task on participant \textit{s6}}
+    \label{appfig:accuracies_ExObs_freq_bands}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ex_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (execution)}
+    \label{appfig:accuracies_ex_freq_bands}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_obs_freq_bands.png}
+    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (observation)}
+    \label{appfig:accuracies_obs_freq_bands}
+\end{figure}
+\FloatBarrier
+
 \subsection{CNN architectures}
+\label{subsec:cnnarchi}
 \paragraph{2D CNNs}
 The 2D CNN architecture is as follows:
 \begin{itemize}
@@ -387,33 +414,6 @@ The 1D CNN architecture is as follows:
   \item Linear layer of 2 neurons, outputs the logits
 \end{itemize}
 We train all 1D CNNs with a learning rate of 0.001 over 10 epochs with weight decay of 10 to avoid fast overfitting.
-
-\paragraph{Analysis of accuracy by frequency bands}
-Here, we provide an analysis of the accuracies of our model based on which frequency band we give to compute the features.
-
-\begin{figure}[h!]
-    \center
-    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ExObs_freq_bands.png}
-    \caption{Accuracies by model and frequency band used for feature extraction, action recognition task on participant \textit{s6}}
-    \label{appfig:accuracies_ExObs_freq_bands}
-\end{figure}
-\FloatBarrier
-
-\begin{figure}[h!]
-    \center
-    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ex_freq_bands.png}
-    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (execution)}
-    \label{appfig:accuracies_ex_freq_bands}
-\end{figure}
-\FloatBarrier
-
-\begin{figure}[h!]
-    \center
-    \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_obs_freq_bands.png}
-    \caption{Accuracies by model and frequency band used for feature extraction, movement recognition task on participant \textit{s6} (observation)}
-    \label{appfig:accuracies_obs_freq_bands}
-\end{figure}
-\FloatBarrier
 
 \newpage
 
