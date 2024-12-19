@@ -72,25 +72,6 @@ P.~T. Joseph~DiGuiseppi, ``Neuroanatomy, postcentral gyrus,'' 2024, pMID:
   \url{http://www.ncbi.nlm.nih.gov/books/NBK549825/}
 \BIBentrySTDinterwordspacing
 
-\bibitem{superior_frontal_gyrus}
-\BIBentryALTinterwordspacing
-F.~d. Boisgueheneuc, R.~Levy, E.~Volle, M.~Seassau, H.~Duffau, S.~Kinkingnehun,
-  Y.~Samson, S.~Zhang, and B.~Dubois, ``Functions of the left superior frontal
-  gyrus in humans: a lesion study,'' \emph{Brain}, vol. 129, no.~12, pp.
-  3315--3328, 09 2006. [Online]. Available:
-  \url{https://doi.org/10.1093/brain/awl244}
-\BIBentrySTDinterwordspacing
-
-\bibitem{insula}
-\BIBentryALTinterwordspacing
-L.~Q. Uddin, J.~S. Nomi, Hébert-Seropian, G.~B., J., and O.~Boucher,
-  ``Structure and function of the human insula,'' \emph{Journal of clinical
-  neurophysiology : official publication of the American
-  Electroencephalographic Society}, vol.~34, pp. 300--306, 2017, pMID:
-  28644199, PMCID: PMC6032992. [Online]. Available:
-  \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6032992/}
-\BIBentrySTDinterwordspacing
-
 \bibitem{scikitlearn}
 F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
   M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos,

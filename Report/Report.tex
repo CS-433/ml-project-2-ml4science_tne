@@ -42,7 +42,7 @@
         \item Decoding precision from power grasp in execution paradigm
         \item Decoding precision from power grasp in observation paradigm.
     \end{inlineroman}
-    Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning (DL) approaches, can effectively decode execution from observation based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the classical models fail to capture the subtle differences in brain activity and therefore achieve low performances. For show that CNN models show promising outcomes in all classification tasks. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
+    Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning (DL) approaches, can effectively decode execution from observation based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the classical models fail to capture the subtle differences in brain activity and therefore achieve low performances. We show that CNN models have promising outcomes in all classification tasks. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
 
 %    distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation.
 \end{abstract}
@@ -85,10 +85,9 @@ In this first classification task, we train and optimize different ML models to 
 \subsection{Responsivity of channels}
 The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the t-tests' p-values. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels, in the precentral and the postcentral gyri. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
-The most important regions are similar across participants and are directly linked to movement (ex : prec.) or somatosensory information (ex : postc.). This was expected as the task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that are more related to self-awareness and self-perception (ex: sf. and ins.), which could be much more linked to the observation trials.
+The most important regions are similar across participants and are directly linked to movement (e.g. prec.) \cite{precentral_gyrus} or somatosensory information (e.g. postc.) \cite{postcentral_gyrus}. This was expected as the task is linked with active hand movement and requires sensory feedback. It is interesting to note that the participants \textit{s11} and \textit{s12} have activity in areas that are related to self-awareness and self-perception (e.g. sf. and ins.), which could be more linked to the observation trials.
 
 \vspace{-1em}
-
 \begin{figure}[h!]
     \center
     \includegraphics[width=0.7\linewidth]{images/Human-brain.png}
@@ -97,6 +96,7 @@ The most important regions are similar across participants and are directly link
 \end{figure}
 \FloatBarrier
 
+\vspace{-1em}
 \begin{table}[h!]
     \centering
     \begin{tabular}{| c | c | c |}
@@ -117,8 +117,9 @@ The most important regions are similar across participants and are directly link
 \end{table}
 
 \vspace{-1.5em}
-For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. The regions with the most importance are similar across participants and are directly linked to movement (ex : prec.)\cite{precentral_gyrus} or somatosensory information (ex : postc.)\cite{postcentral_gyrus}, especially for the first two participants. This makes sense as this task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that have weaker ties to motor and sensorimotor functions and perform higher level cognitive tasks (ex: sf. and ins.)\cite{superior_frontal_gyrus, insula}, which could be much more linked to the observation trials.
+% For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. The regions with the most importance are similar across participants and are directly linked to movement (e.g. prec.)\cite{precentral_gyrus} or somatosensory information (e.g. postc.)\cite{postcentral_gyrus}, especially for the first two participants. This makes sense as this task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that have weaker ties to motor and sensorimotor functions and perform higher level cognitive tasks (e.g. sf. and ins.)\cite{superior_frontal_gyrus, insula}, which could be much more linked to the observation trials.
 
+\vspace{-1.1em}
 \subsection{Analysis of frequency bands}
 We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggest that these bands are the most informative for differentiating observation from execution.
 
@@ -126,7 +127,7 @@ We investigate if specific frequency bands could gives more information than oth
 To investigate the relevance of selecting only responsive channels, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, noting that they have a different number of channels. We discuss only the results of participant \textit{s6}.
 
 \subsection{Models}
-To create and train the classical ML models, we adopted the well-known and performant Scikit-Learn library \cite{scikitlearn}. The DL models are developed using the PyTorch library \cite{pytorch}. We selected models based on the literature available on EEG analysis.
+For the classical ML models, we adopted the well-known and performant Scikit-Learn library \cite{scikitlearn}. The DL models are developed using the PyTorch library \cite{pytorch}. We selected models based on the literature available on EEG analysis.
 
 \paragraph{Logistic regression}
 Logistic regression (LR) is a computationally simple ML technique, and has previously used in EEG classification \cite{SUBASI200587, NIPS2006_35937e34}. It was trained with and without Principal Components Analysis (PCA, 95\% explained variance).
@@ -142,17 +143,18 @@ In addition to traditional ML models, we also train Multilayer Perceptron (MLP) 
 
 We try different MLP and select the best by using a validation subset. MLP models are trained for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay (\(10^{-2}\), hyperparameter) directly during the parameter update, leading to more consistent regularization and better generalization. We use the cross-entropy loss. MLPs are optimized and discussed only for participant \textit{s6}.
 
+\begin{figure}[h!]
+    \center
+    \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ExObs.png}
+    \caption{Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}
+    \label{fig:accacrosspartsexobs}
+ \end{figure}
+\FloatBarrier
+
 \subsection{Results}
-We tested the models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance, although it is higher than chance (see \aref{appfig:accuracies_ExObs}). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
+We tested the models on the same test set. As expected, all models obtained very high accuracies, as seen on \autoref{fig:accacrosspartsexobs}. When using non-responsive channels, we see a large drop in performance, although it is higher than chance (see \aref{appfig:accuracies_ExObs}). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
 
 The MLP is performing very well for participant \textit{s6}: on the test set, we obtain an accuracy of 95\% while the baseline is at 49\%. The best model is also the simplest: two layers of 8 neurons each, with a learning rate of \(10^{-1}\).
-
-\begin{figure}[h!]
-  \center
-  \includegraphics[width=\linewidth]{../Code/figures/accuracies_across_part_ExObs.png}
-  \caption{Accuracies by model and participant for the action recognition task: all models perform very well when trained on features extracted from responsive channels}
-\end{figure}
-\FloatBarrier
 
 \subsection{Analysis of frequency bands}
 We investigate if specific frequency bands could give more information than other and if there are differences across the action type. We train the classical models with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggests that these bands are the most informative for differentiating observation from execution.
@@ -174,10 +176,10 @@ We use the same families of model as in the previous part for both execution and
 As expected, our results are significantly lower in those tasks than in the first part.
 
 \paragraph{Execution trials}
-(see \ref{appfig:accuracies_across_part_ex}) LR with and without PCA tends to perform better than the other models (56-77\% across participant). The accuracy obtained for SVM with and without PCA is around the same range except for participant \textit{s7} which have accuracies below chance level and RF is around chance level for all participant (46-64\%).
+(see \aref{appfig:accuracies_across_part_ex}) LR with and without PCA tends to perform better than the other models (56-77\% across participant). The accuracy obtained for SVM with and without PCA is around the same range except for participant \textit{s7} which have accuracies below chance level and RF is around chance level for all participant (46-64\%).
 
 \paragraph{Observation trials}
-(see \ref{appfig:accuracies_across_part_obs}) The trends are very similar to execution trials with slightly lower accuracies.
+(see \aref{appfig:accuracies_across_part_obs}) The trends are very similar to execution trials with slightly lower accuracies.
 
 \section{Convolutional approaches}
 \label{sec:deeplearning}
@@ -190,7 +192,7 @@ In this section, we are not focusing on performance and thus wont optimize model
 The architectures of the CNNs used are detailed in \aref{subsec:cnnarchi}. We are not testing multiple CNN architecture, but use a validation set for the learning rate, weight decay and the subsequent MLP layers.
 
 \paragraph{One-dimensional CNN}
-One-dimensional CNNs are composed of kernels that are convolved with a channel's signal directly. As they operate on data in one dimension, the input will be a tensor of size \((N, C, L)\), where \(N\) is the batch size, \(C\) the number of (responsive) channels and \(L\) the fixed length of each trial. This is close to how we computed our features: supposing the same kernel size as the length of our moving averages, we would get the same features if the network learned moving averages too. Given this and the known power of CNNs, we expect this model to have the best performance. The caveat is overfitting, as we have small datasets.
+One-dimensional CNNs are composed of kernels that are convolved with a channel's signal directly. As they operate on data in one dimension, the input will be a tensor of size \((N, C, L)\), where \(N\) is the batch size, \(C\) the number of (responsive) channels and \(L\) the fixed length of each trial. This is close to how we computed our features: supposing the same kernel size as the length of our moving averages, we would get the same features if the network learned moving averages too. Given this and the known power of CNNs, we expect this model to have the best performance.
 
 \paragraph{Two-dimensional CNN}
 Two-dimensional CNNs are composed of 2D kernels that will operate on multiple channels at the same time. This means that we give as input a tensor of dimensions \((N, C, H, W)\), with \(H\) the number of (responsive) channels and \(W\) the length of each signal. The naming of the dimensions \(H\) and \(W\) is not arbitrary. Indeed, we can think of this superposition of channels as a picture, where each signal is a position on the \(y\)-axis and every timepoint a position on the \(x\)-axis.
@@ -202,25 +204,28 @@ The 2D CNN can recognize actions with a 96\% accuracy, while its 1D counterpart 
 \label{sec:discussion}
 All models offered high accuracy in the action recognition task. Interestingly, we observed that our models also performed well even when given features extracted from only one frequency band. The locations of the responsive channels were found to be linked to movement or somatosensation, which corresponds to the experiment.
 
-As expected, both movement recognition tasks resulted in low performance across all the classical models, as well as for shallow neural networks. We hypothesize that this is due to only low differences in the neural signals between the paradigms studied.
+As expected, movement recognition task is harder. The maximal performance obtained with the execution paradigm are around 77\%, and even lower for the observation paradigm. It is expected as in execution the neural signals are stronger than observation.
 
 However, by approaching the problem from a pure Deep Learning point of view, it appears that convolutional networks are able to themselves extract relevant features for classification. Without hard hyperparameters optimization, we obtained significantly higher accuracy than any other model for the movement recognition task.
 
 \section{Conclusion}
 \label{sec:conclusion}
-In this project, we used various ML models to analyze the classification accuracies of three distinct tasks. While every model was capable of classifying well the first task, the performance dropped when the differences in brain signals were more subtle. Our work therefore shows that ML models can already successfully be applied to (s)EEG signals without the need for handcrafted features, but they need clear differences in signal. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models. Maybe the future of feature extraction is by using ML methods directly.
+In this project, we used various ML models to analyze the classification accuracies of three distinct tasks. Every models tested were able to successfully decode observation trials from execution ones. However, decoding between two very similar movements in either of these two paradigms prove to be very difficult and the performances of the models start to drastically drop. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models.
+
+
+% While every model was capable of classifying well the first task, the performance dropped when the differences in brain signals were more subtle. Our work therefore shows that ML models can already successfully be applied to (s)EEG signals without the need for handcrafted features, but they need clear differences in signal. Further experiments can be done on the models developed here to finetune them and verify whether they are able to achieve similar accuracy as in more distinct tasks or not. Additionally, more research is necessary on the preprocessing pipeline and feature extraction as to find optimal data to feed the models.
 
 \newpage
 %%%%%%%%%% ETHICAL RISKS %%%%%%%%%%
 %% 200 to 400 words max., does not count in the 4-page limit
 \section{Ethical risks}
-It is clear that the analysis of EEG and other brain signals present a unique set of ethical challenges. Given that we are not sharing the dataset for privacy concern, we will focus on this ethical risk in this brief analysis. EEG signals reveal information not only about the physical health of a subject, but also mental states, emotions and cognitive functions. With the popularization of such tools, we risk losing a fundamental right to mental privacy. This is not only true for emotions, but also religious and political opinions. For instance, neuropolitics\cite{neuropolitics} is a whole field of research that wishes to find the neural roots of our political beliefs. Prediction is just a step further, step that already stated with work such as \cite{galli_early_2021} and \cite{yun_erp_2022}.
+It is clear that the analysis of EEG and other brain signals present a unique set of ethical challenges. Given that we are not sharing the dataset for privacy concern, we will focus on this ethical risk in this brief analysis. EEG signals reveal information not only about the physical health of a subject, but also mental states, emotions and cognitive functions. With the popularization of such tools, we risk losing a fundamental right to mental privacy. This is not only true for emotions, but also religious and political opinions. For instance, neuropolitics \cite{neuropolitics} is a whole field of research that wishes to find the neural roots of our political beliefs. Prediction is just a step further, already started with work such as \cite{galli_early_2021} and \cite{yun_erp_2022}.
 
-As current methods require possible invasive electrodes, or to use expensive and complicated machines such as fMRI scanners, primarily patients ongoing clinical treatment and study subjects are affected by those risks at the moment. However, the potential violation of cognitive privacy underscores the need for robust privacy and anonymization measures when using EEG datasets. If not correctly established, third parties could gain valuable data on the private mental processes of a user and use it to their advantages. Companies such as Tesla or Meta already invested in such technologies, and not renowned for their privacy-oriented policies. The severity and ramifications of cognitive privacy violating in a large pool of user is hard to quantify, but without strict policies, the possibility of a future without private thought becomes alarmingly plausible.
+As current methods require possible invasive electrodes, or the use of expensive and complicated machines such as fMRI scanners, primarily patients ongoing clinical treatment and study subjects are affected by those risks at the moment. However, the potential violation of cognitive privacy underscores the need for robust privacy and anonymization measures when using EEG datasets. If not correctly established, third parties could gain valuable data on the private mental processes of a user and use it to their advantages. Companies such as Tesla or Meta already invested in such technologies, and not renowned for their privacy-oriented policies. The severity and ramifications of cognitive privacy violating in a large pool of user is hard to quantify, but without strict policies, the possibility of a future without private thought becomes alarmingly plausible.
 
-Even without speculating about future developments in brain signal analysis, EEG signals are already used in identifying individuals. For example, tools for User Authentication via EEG signals already exists\cite{10058960}. It is then clear that, when in possession of private EEG data, precautions must be taken to ensure that this data remains within the restricted pool of authorized researchers who have been granted access. In this project, we were careful not to upload this data on any online repository (e.g. GitHub), and we will not give the dataset to correctors outside the TNE laboratory. Moreover, we did not access any personal information from the participants involved.
+Even without speculating about future developments in brain signal analysis, it is important to note that EEG signals are already used in identifying individuals. For example, tools for User Authentication via EEG signals already exists \cite{10058960}. It is then clear that, when in possession of private EEG data, precautions must be taken to ensure that this data remains within the restricted pool of authorized researchers who have been granted access. In this project, we were careful not to upload this data on any online repository (e.g. GitHub), and we will not give the dataset to correctors outside the TNE laboratory. Moreover, we did not access any personal information from the participants involved.
 
-Advanced methods exist to encrypt data while allowing computations on it\cite{app11167360}. Unfortunately, the time and scope of this project did not permit the implementation of such technologies.
+Advanced methods exist to encrypt data while allowing computations on it \cite{app11167360}. Unfortunately, the time and scope of this project did not permit the implementation of such technologies.
 
 %% Not in the 4-page limit
 
@@ -437,7 +442,7 @@ The 1D CNN architecture is as follows:
 \end{itemize}
 We train all 1D CNNs with a learning rate of 0.001 over 10 epochs with weight decay of 10 to avoid fast overfitting.
 
-\newpage
+\clearpage
 
 \bibliographystyle{IEEEtran}
 \bibliography{ref}
