@@ -42,7 +42,7 @@
         \item Decoding precision from power grasp in execution paradigm
         \item Decoding precision from power grasp in observation paradigm.
     \end{inlineroman}
-    Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning (DL) approaches, can effectively decode execution from observation based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the classical models fail to capture the subtle differences in brain activity and therefore achieve low performances. CNN models did show some interesting outcomes for all classification tasks. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
+    Our work is inspired by ongoing debate over the presence of an action-observation network in cortical signals. By characterizing these signals and applying classification models, we aim to uncover similarities and differences between execution and observation processes in upper limb movements, and to verify whether those characteristics are generalizable across different human subjects. Our findings demonstrate that ML models, including Deep Learning (DL) approaches, can effectively decode execution from observation based on EEG features. However, we also observe that, for tasks where the subject is passively observing different movements, the classical models fail to capture the subtle differences in brain activity and therefore achieve low performances. For show that CNN models show promising outcomes in all classification tasks. These results highlight both the potential and challenges of using ML to decode neural activity using intracranial signals.
 
 %    distinguishing between action execution and observation, and differentiating between precision and power grasps in execution and in observation.
 \end{abstract}
@@ -85,7 +85,10 @@ In this first classification task, we train and optimize different ML models to 
 \subsection{Responsivity of channels}
 The locations of the responsive channels is critical in understanding a potential action-observation network. To this end, we sorted the responsive channels in ascending order of the t-tests' p-values. For participant \textit{s6}, \autoref{fig:s6actionrecogchannels} shows the locations of the ten first responsive channels, in the precentral and the postcentral gyri. \autoref{tab:actionrecogchannellocations} shows the locations of the most responsive channels for all participants.
 
+The most important regions are similar across participants and are directly linked to movement (ex : prec.) or somatosensory information (ex : postc.). This was expected as the task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that are more related to self-awareness and self-perception (ex: sf. and ins.), which could be much more linked to the observation trials.
+
 \vspace{-1em}
+
 \begin{figure}[h!]
     \center
     \includegraphics[width=0.7\linewidth]{images/Human-brain.png}
@@ -94,7 +97,6 @@ The locations of the responsive channels is critical in understanding a potentia
 \end{figure}
 \FloatBarrier
 
-\vspace{-1em}
 \begin{table}[h!]
     \centering
     \begin{tabular}{| c | c | c |}
@@ -114,30 +116,28 @@ The locations of the responsive channels is critical in understanding a potentia
     \label{tab:actionrecogchannellocations}
 \end{table}
 
-\vspace{-1.5em}
+\vspace{-2em}
 % For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. But on the contrary, the number of responsive channels is quite similar for most participants, sitting around 30, with the exception of participant \textit{s6} with 40 channels.
 
-The most important regions are similar across participants and are directly linked to movement (ex : prec.) or somatosensory information (ex : postc.). This was expected as the task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that are more related to self-awareness and self-perception (ex: sf. and ins.), which could be much more linked to the observation trials.
-
 \subsection{Baseline data}
-To investigate the relevance of selecting only responsive channels, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, noting that they have a different number of channels. We discussed only the results of participant \textit{s6}.
+To investigate the relevance of selecting only responsive channels, we also generated a list of channels that are not responsive, and computed features from them. We run each model on both sets of data, noting that they have a different number of channels. We discuss only the results of participant \textit{s6}.
 
 \subsection{Models}
 To create and train the classical ML models, we adopted the well-known and performant Scikit-Learn library \cite{scikitlearn}. The DL models are developed using the PyTorch library \cite{pytorch}. We selected models based on the literature available on EEG analysis.
 
 \paragraph{Logistic regression}
-Logistic regression (LR) is a computationally simple ML technique, and has previously used in EEG classification \cite{SUBASI200587, NIPS2006_35937e34}. It was trained with and without Principal Components Analysis (PCA).
+Logistic regression (LR) is a computationally simple ML technique, and has previously used in EEG classification \cite{SUBASI200587, NIPS2006_35937e34}. It was trained with and without Principal Components Analysis (PCA, 95\% explained variance).
 
 \paragraph{SVM}
-We train two Singular Vector Machines (SVM) models, with and without PCA. SVM can handle high dimensional data, even for small datasets. Although more computationally demanding than other methods, it is widely used in EEG classification with good results \cite{knn_svm_review}.
+We train two Singular Vector Machines (SVM) models, with and without PCA. SVM can handle high dimensional data, even for small datasets. Although more computationally demanding than other methods, it is widely used in EEG classification with good results \cite{knn_svm_review}. We use a grid search to find good hyperparameters for the SVMs (see \aref{subsec:mlhyperparams}).
 
 \paragraph{Random forest}
-Random Forest (RF) classifiers are frequently used with a lower set of carefully crafted features (e.g. in \cite{eegrfclassif} with 11 features), we hypothesize that we can also have interesting results using RF here.
+Random Forest (RF) classifiers are frequently used with a lower set of carefully crafted features (e.g. in \cite{eegrfclassif} with 11 features), we hypothesize that we can also have interesting results using RF here. We use a grid search to find good hyperparameters (see \aref{subsec:mlhyperparams}).
 
 \paragraph{MLP}
 In addition to traditional ML models, we also train Multilayer Perceptron (MLP) models. We chose to include MLP as it is widely used in EEG classification\footnote{3'610 results for 'EEG MLP classification' on Google Scholar in 2024}. The main issue with MLP is that they are universal approximators and are thus prone to overfitting, especially for datasets as small as ours.
 
-We try different MLP and select the best by using a validation subset. MLP models are trained for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay (\(10^{-2}\), hyperparameter) directly during the parameter update, leading to more consistent regularization and better generalization. MLPs are optimized and discussed only for participant \textit{s6}.
+We try different MLP and select the best by using a validation subset. MLP models are trained for 10 epochs with batches of 4 datapoints. We use the AdamW optimizer, which directly applies weight decay (\(10^{-2}\), hyperparameter) directly during the parameter update, leading to more consistent regularization and better generalization. We use the cross-entropy loss. MLPs are optimized and discussed only for participant \textit{s6}.
 
 \subsection{Results}
 We tested the models on the same test set. As expected, all models obtained very high accuracies. When using non-responsive channels, we see a large drop in performance, although it is higher than chance (see \aref{appfig:accuracies_ExObs}). This confirmed our hypothesis that we can reduce significantly the number of features by first selecting responsive channels.
@@ -152,7 +152,7 @@ The MLP is performing very well for participant \textit{s6}: on the test set, we
 \FloatBarrier
 
 \subsection{Analysis of frequency bands}
-We investigate if specific frequency bands could give more information than other and if there are differences across the action type. We train the classical models with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggests that these bands are the most informative for differentiating observation from execution.
+We investigate if specific frequency bands could give more information than other and if there are differences across the action type. We train the classical models with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands_freqs}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggests that these bands are the most informative for differentiating observation from execution.
 
 \section{Movement recognition}
 \label{sec:objectrecognition}
@@ -201,9 +201,11 @@ The 2D CNN can recognize actions with a 96\% accuracy, while its 1D counterpart 
 
 \section{Discussion}
 \label{sec:discussion}
-For the action recognition task, we obtain as expected very good accuracies over all models and participants. Random forests see a small drop in performance: as explained above, this type of model could attain better accuracies when given carefully crafted features.
+All models offered high accuracy in the action recognition task. Interestingly, we observed that our models also performed well even when given features extracted from only one frequency band. The locations of the responsive channels were found to be linked to movement or somatosensation, which corresponds to the experiment.
 
-For the frequency bands analysis, we can see that all frequency bands have enough information to decode successfully the action type. However, regarding the movement type, it seems that none of the frequency bands pocess enough information on its own, which means that the information is spread across the different frequency bands.
+As expected, both movement recognition tasks resulted in low performance across all the classical models, as well as for shallow neural networks. We hypothesize that this is due to only low differences in the neural signals between the paradigms studied.
+
+However, by approaching the problem from a pure Deep Learning point of view, it appears that convolutional networks are able to themselves extract relevant features for classification. Without hard hyperparameters optimization, we obtained significantly higher accuracy than any other model for the movement recognition task.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -292,6 +294,21 @@ Here, we show the locations of the ten responsive channels in the two movement r
     \label{apptab:obsmovchannellocations}
 \end{table}
 
+\subsection{Classical models' hyperparameters}
+\label{subsec:mlhyperparams}
+\paragraph{SVM}
+The optimal hyperparameters are found within the following sets using grid search:
+\begin{itemize}
+    \item \textbf{Kernel}: linear / rbf / sigmoid
+    \item \(\mathbf{C}\): 0.1 / 1 / 10 / 100 / 1000
+\end{itemize}
+\paragraph{Random Forest}
+The optimal hyperparameters are found within the following sets using grid search:
+\begin{itemize}
+    \item \textbf{Number of estimators}: 10 / 50 / 90 / 130
+    \item \textbf{Maximum depth}: 10 / 25 / 50
+\end{itemize}
+
 \subsection{Acronyms}
 \aref{apptab:acronyms} contains the list of brain regions' acronyms used in the report. It does not contain all the regions the participants had electrodes in, but only those relevant in our analyses.
 
@@ -356,7 +373,7 @@ The following graphs represent the accuracies obtained by model and by participa
     \center
     \includegraphics[width=\linewidth]{../Code/figures/s6_acc_vs_channels.png}
     \caption{Accuracies depending on the number of responsive channels used by models for action recognition task on participant \textit{s6}}
-    \label{appfig:accuracies_ExObs_freq_bands}
+    \label{appfig:accuracies_ExObs_freq_bands_channels}
 \end{figure}
 \FloatBarrier
 
@@ -367,7 +384,7 @@ Here, we provide an analysis of the accuracies of our model based on which frequ
     \center
     \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ExObs_freq_bands.png}
     \caption{Accuracies by model and frequency band used for feature extraction, action recognition task on participant \textit{s6}}
-    \label{appfig:accuracies_ExObs_freq_bands}
+    \label{appfig:accuracies_ExObs_freq_bands_freqs}
 \end{figure}
 \FloatBarrier
 
