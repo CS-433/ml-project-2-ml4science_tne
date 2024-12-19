@@ -59,6 +59,38 @@ O.~M. Solomon, Jr, ``Psd computations using welch's method. [power spectral
   \url{https://www.osti.gov/biblio/5688766}
 \BIBentrySTDinterwordspacing
 
+\bibitem{precentral_gyrus}
+\BIBentryALTinterwordspacing
+P.~T. Linnea~Banker, ``Neuroanatomy, precentral gyrus,'' 2024, pMID: 31334938.
+  [Online]. Available: \url{http://www.ncbi.nlm.nih.gov/books/NBK544218/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{postcentral_gyrus}
+\BIBentryALTinterwordspacing
+P.~T. Joseph~DiGuiseppi, ``Neuroanatomy, postcentral gyrus,'' 2024, pMID:
+  31751015. [Online]. Available:
+  \url{http://www.ncbi.nlm.nih.gov/books/NBK549825/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{superior_frontal_gyrus}
+\BIBentryALTinterwordspacing
+F.~d. Boisgueheneuc, R.~Levy, E.~Volle, M.~Seassau, H.~Duffau, S.~Kinkingnehun,
+  Y.~Samson, S.~Zhang, and B.~Dubois, ``Functions of the left superior frontal
+  gyrus in humans: a lesion study,'' \emph{Brain}, vol. 129, no.~12, pp.
+  3315--3328, 09 2006. [Online]. Available:
+  \url{https://doi.org/10.1093/brain/awl244}
+\BIBentrySTDinterwordspacing
+
+\bibitem{insula}
+\BIBentryALTinterwordspacing
+L.~Q. Uddin, J.~S. Nomi, Hébert-Seropian, G.~B., J., and O.~Boucher,
+  ``Structure and function of the human insula,'' \emph{Journal of clinical
+  neurophysiology : official publication of the American
+  Electroencephalographic Society}, vol.~34, pp. 300--306, 2017, pMID:
+  28644199, PMCID: PMC6032992. [Online]. Available:
+  \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6032992/}
+\BIBentrySTDinterwordspacing
+
 \bibitem{scikitlearn}
 F.~Pedregosa, G.~Varoquaux, A.~Gramfort, V.~Michel, B.~Thirion, O.~Grisel,
   M.~Blondel, P.~Prettenhofer, R.~Weiss, V.~Dubourg, J.~Vanderplas, A.~Passos,
@@ -104,6 +136,15 @@ C.~Donos, M.~D\"{u}mpelmann, and A.~Schulze-Bonhage, ``Early seizure detection
   \emph{International Journal of Neural Systems}, vol.~25, no.~05, p. 1550023,
   2015, pMID: 26022388. [Online]. Available:
   \url{https://doi.org/10.1142/S0129065715500239}
+\BIBentrySTDinterwordspacing
+
+\bibitem{paracentral}
+\BIBentryALTinterwordspacing
+A.~Patra, ``Morphology and morphometry of human paracentral lobule: An
+  anatomical study with its application in neurosurgery,'' \emph{Asian Journal
+  of Neurosurgery}, vol.~16, pp. 349--353, 2021, pMID: 34268163, PMCID:
+  PMC8244697. [Online]. Available:
+  \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8244697/}
 \BIBentrySTDinterwordspacing
 
 \bibitem{neuropolitics}

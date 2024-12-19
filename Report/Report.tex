@@ -117,7 +117,7 @@ The most important regions are similar across participants and are directly link
 \end{table}
 
 \vspace{-1.5em}
-For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. The regions with the most importance are similar across participants and are directly linked to movement (ex : prec.)\cite{precentral_gyrus} or somatosensory information (ex : postc.)\cite{postcentral_gyrus}, especially for the first two participants. This makes sense as this task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that have weaker ties to motor and sensorimotor functions and perform higher level cognitive tasks (ex: sf. and ins.)\cite{superior_frontal_gyrus}\cite{superior_frontal_gyrus_wikipedia}\cite{insula}, which could be much more linked to the observation trials.
+For this task we see that the regions vary quite a bit between participants. Participant \textit{s6} has only two regions with responsive channels, while \textit{s12} has five. The regions with the most importance are similar across participants and are directly linked to movement (ex : prec.)\cite{precentral_gyrus} or somatosensory information (ex : postc.)\cite{postcentral_gyrus}, especially for the first two participants. This makes sense as this task is linked with active hand movement and requires sensory feedback. It is interesting to note that some of the participants (\textit{s11} and \textit{s12}) have activity in areas that have weaker ties to motor and sensorimotor functions and perform higher level cognitive tasks (ex: sf. and ins.)\cite{superior_frontal_gyrus, insula}, which could be much more linked to the observation trials.
 
 \subsection{Analysis of frequency bands}
 We investigate if specific frequency bands could gives more information than other and if there are differences across the action type. We trained the model with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggest that these bands are the most informative for differentiating observation from execution.
@@ -155,7 +155,7 @@ The MLP is performing very well for participant \textit{s6}: on the test set, we
 \FloatBarrier
 
 \subsection{Analysis of frequency bands}
-We investigate if specific frequency bands could give more information than other and if there are differences across the action type. We train the classical models with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands_freqs}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggests that these bands are the most informative for differentiating observation from execution.
+We investigate if specific frequency bands could give more information than other and if there are differences across the action type. We train the classical models with a dataset containing only features from a specific frequency band. We then compared the performance of the models across the different frequency bands (see \aref{appfig:accuracies_ExObs_freq_bands}). For action recognition, all models can detect the action type with high accuracy, regardless of the frequency band (above 75\%). The best performance was obtained with delta and gamma frequency bands, with accuracies around 95\%, which suggests that these bands are the most informative for differentiating observation from execution.
 
 \section{Movement recognition}
 \label{sec:objectrecognition}
@@ -374,7 +374,7 @@ The following graphs represent the accuracies obtained by model and by participa
     \center
     \includegraphics[width=\linewidth]{../Code/figures/s6_acc_vs_channels.png}
     \caption{Accuracies depending on the number of responsive channels used by models for action recognition task on participant \textit{s6}}
-    \label{appfig:accuracies_ExObs_freq_bands_channels}
+    \label{appfig:accuracies_ExObs_channels}
 \end{figure}
 \FloatBarrier
 
@@ -385,7 +385,7 @@ Here, we provide an analysis of the accuracies of our model based on which frequ
     \center
     \includegraphics[width=\linewidth]{../Code/figures/s6_accuracies_ExObs_freq_bands.png}
     \caption{Accuracies by model and frequency band used for feature extraction, action recognition task on participant \textit{s6}}
-    \label{appfig:accuracies_ExObs_freq_bands_freqs}
+    \label{appfig:accuracies_ExObs_freq_bands}
 \end{figure}
 \FloatBarrier
 
